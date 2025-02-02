@@ -1,5 +1,4 @@
-rem This Windows batch file was tested and works with:
-rem - FFmpeg (the version in LosslessCut 3.63.0)
+rem This bat file was tested and works with the "LosslessCut 3.64.0" version of FFmpeg
 @echo off
 set input_video="C:\New folder\test.mp4"
 set output_log="C:\New folder\frame_log.txt"
