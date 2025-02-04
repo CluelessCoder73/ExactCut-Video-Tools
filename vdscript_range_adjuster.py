@@ -86,6 +86,7 @@ After generating the adjusted .vdscript file, you can convert it to other format
 
 This script provides a powerful solution for ensuring accurate, lossless cuts in your video editing workflow, especially when working with proxy videos for high-resolution content. By automating the adjustment of cut points to legal frame boundaries, it saves time and guarantees the integrity of your final edit.
 """
+import os
 import re
 
 def read_frame_log(file_path):
@@ -187,16 +188,27 @@ def process_vdscript(input_file, output_file, frame_types, i_frame_offset, merge
         # Write the VirtualDub.video.SetRange() line last
         outfile.write('VirtualDub.video.SetRange();\n')
 
+def batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode):
+    for filename in os.listdir(directory):
+        if filename.endswith('.vdscript'):
+            input_vdscript = os.path.join(directory, filename)
+            frame_log_file = os.path.join(directory, f"{os.path.splitext(filename)[0]}_frame_log.txt")
+            output_vdscript = os.path.join(directory, f"{os.path.splitext(filename)[0]}_adjusted.vdscript")
+            
+            if os.path.exists(frame_log_file):
+                frame_types = read_frame_log(frame_log_file)
+                process_vdscript(input_vdscript, output_vdscript, frame_types, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
+                print(f"Processed: {filename}")
+            else:
+                print(f"Skipped: {filename} (No corresponding frame log file found)")
+
 # Main execution
-frame_log_file = 'frame_log.txt'
-input_vdscript = 'input.vdscript'
-output_vdscript = 'output_adjusted_i1_m100_scm.vdscript'
-i_frame_offset = 1  # Change this value to go further back in I-frames
-merge_ranges_option = True  # Set to False to disable merging
-min_gap_between_ranges = 100  # Minimum gap between ranges (in frames)
-short_cut_mode = True  # Set to True to enable "short cut mode" for endpoint adjustment. Set to False for "full GOP mode".
+directory = '.'  # Current directory, change if needed
+i_frame_offset = 1
+merge_ranges_option = True
+min_gap_between_ranges = 100
+short_cut_mode = True
 
-frame_types = read_frame_log(frame_log_file)
-process_vdscript(input_vdscript, output_vdscript, frame_types, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
+batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
 
-print("Conversion completed. Check output.vdscript for the result.")
+print("Batch processing completed.")
