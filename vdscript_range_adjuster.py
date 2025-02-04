@@ -1,5 +1,5 @@
 """
-User Guide for vdscript_range_adjuster_v1.4.1.py
+User Guide for vdscript_range_adjuster.py
 Purpose
 This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors.
 # This script was tested and works with:
@@ -29,7 +29,7 @@ Setup
 
     Prepare the frame_log.txt:
         Generate a frame_log.txt file with information on frame types (I, P, B) using ffmpeg. This can be easily achieved by running "frame_log_extractor.bat" (edit filename paths 1st!).
-    Save the script as "vdscript_range_adjuster_v1.4.1.py" in your working directory.
+    Save the script as "vdscript_range_adjuster.py" in your working directory.
     Place your input .vdscript file and frame_log.txt in the same directory.
 
 Configuration
@@ -59,7 +59,7 @@ Usage
     Navigate to the directory containing the script and input files.
     Run the script:
 
-    python vdscript_range_adjuster_v1.4.1.py
+    python vdscript_range_adjuster.py
 
     The script will process your input file and create an output file with adjusted cut points.
 
