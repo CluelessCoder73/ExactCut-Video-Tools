@@ -1,9 +1,11 @@
-rem WARNING:This bat file overwrites frame logs if they already exist!
+:: WARNING:This bat file overwrites frame logs if they already exist!
+:: Tested and works with "LosslessCut 3.64.0" version of FFmpeg
 @echo off
+cd /d %~dp0
 setlocal enabledelayedexpansion
 
 rem Set the folder containing the videos
-set "video_folder=C:\New folder"
+set "video_folder=%~dp0"
 
 rem Set the path to FFmpeg
 set "ffmpeg_path=C:\PortableApps\LosslessCut-win-x64\resources\ffmpeg.exe"
