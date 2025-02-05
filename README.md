@@ -82,5 +82,6 @@ After generating the adjusted .vdscript file, you can convert it to other format
 
     For Cuttermaran: Use "vdscript_to_cpf" to create a .cpf file.
     For LosslessCut: Use "vdscript_to_llc" to transform the .vdscript into a .llc file format.
+	Both are available on my GitHub page!
 
 This script provides a powerful solution for ensuring accurate, lossless cuts in your video editing workflow, especially when working with proxy videos for high-resolution content. By automating the adjustment of cut points to legal frame boundaries, it saves time and guarantees the integrity of your final edit.
