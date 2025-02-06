@@ -1,5 +1,3 @@
-:: WARNING:This bat file overwrites frame logs if they already exist!
-:: Tested and works with "LosslessCut 3.64.0" version of FFmpeg
 @echo off
 cd /d %~dp0
 setlocal enabledelayedexpansion
@@ -17,16 +15,28 @@ for %%F in ("%video_folder%\*.mp4" "%video_folder%\*.avi" "%video_folder%\*.mkv"
     set "input_video=%%F"
     set "output_log=%video_folder%\%%~nF_frame_log.txt"
     
-    echo Processing video: !input_video!
+    set "process_video=1"
+    if exist "!output_log!" (
+        choice /c yn /n /m "!output_log! already exists. Overwrite? [Y/N]"
+        if errorlevel 2 (
+            echo Skipping %%~nxF
+            echo.
+            set "process_video=0"
+        )
+    )
     
-    rem Run FFmpeg command to extract frame information
-    "!ffmpeg_path!" -i "!input_video!" -export_side_data +venc_params -vf showinfo -f null - > "!output_log!" 2>&1
-    
-    rem Check if FFmpeg command completed successfully
-    if !ERRORLEVEL!==0 (
-        echo Operation completed successfully for: %%~nxF
-    ) else (
-        echo Operation failed for: %%~nxF
+    if "!process_video!"=="1" (
+        echo Processing video: !input_video!
+
+        rem Run FFmpeg command to extract frame information        
+        "!ffmpeg_path!" -i "!input_video!" -export_side_data +venc_params -vf showinfo -f null - > "!output_log!" 2>&1
+
+        rem Check if FFmpeg command completed successfully        
+        if !ERRORLEVEL!==0 (
+            echo Operation completed successfully for: %%~nxF
+        ) else (
+            echo Operation failed for: %%~nxF
+        )
     )
     
     echo.
