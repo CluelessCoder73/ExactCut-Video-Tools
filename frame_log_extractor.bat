@@ -13,7 +13,7 @@ echo Processing videos in: %video_folder%
 rem Loop through all video files in the folder
 for %%F in ("%video_folder%\*.mp4" "%video_folder%\*.avi" "%video_folder%\*.mkv" "%video_folder%\*.mov" "%video_folder%\*.m4v" "%video_folder%\*.m2ts" "%video_folder%\*.mts" "%video_folder%\*.ts" "%video_folder%\*.wmv" "%video_folder%\*.asf" "%video_folder%\*.flv" "%video_folder%\*.webm" "%video_folder%\*.3gp" "%video_folder%\*.ogv" "%video_folder%\*.vob" "%video_folder%\*.mpg" "%video_folder%\*.mpeg" "%video_folder%\*.m2v") do (
     set "input_video=%%F"
-    set "output_log=%video_folder%\%%~nF_frame_log.txt"
+    set "output_log=%video_folder%\%%~nxF_frame_log.txt"
     
     set "process_video=1"
     if exist "!output_log!" (
