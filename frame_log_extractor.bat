@@ -29,7 +29,7 @@ for %%F in ("%video_folder%\*.mp4" "%video_folder%\*.avi" "%video_folder%\*.mkv"
         echo Processing video: !input_video!
 
         rem Run FFmpeg command to extract frame information        
-        "!ffmpeg_path!" -i "!input_video!" -export_side_data +venc_params -vf showinfo -f null - > "!output_log!" 2>&1
+        "!ffmpeg_path!" -i "!input_video!" -vf showinfo -f null - 2>&1 | findstr /i "n:" > "!output_log!"
 
         rem Check if FFmpeg command completed successfully        
         if !ERRORLEVEL!==0 (
