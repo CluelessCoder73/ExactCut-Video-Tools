@@ -3,7 +3,7 @@ User Guide for 1stGOP_analyzer.py
 Purpose
 This script analyzes VirtualDub script files (.vdscript) to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are converting VirtualDub scripts to LosslessCut project files (.llc) and need to ensure frame-accurate cuts without losing the first GOP of any segment.
 # This script was tested and works with:
-# - Python 3.12.5
+# - Python 3.13.2
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
 # - "FFmpeg" generated frame_log.txt files (the version in LosslessCut 3.63.0)
@@ -18,13 +18,13 @@ Features
 Prerequisites
 
     Python 3.x installed on your system
-    Input .vdscript file (typically output from vdscript_range_adjuster_v1.4.1.py)
+    Input .vdscript file (typically output from vdscript_range_adjuster.py)
     Frame log file (frame_log.txt) containing frame type information
 
 Setup
 
     Save the script as "1stGOP_analyzer.py" in your working directory.
-    Place your input .vdscript file and frame_log.txt in the same directory. Note: The frame_log.txt should already have been created before the "vdscript_range_adjuster_v1.4.1.py" stage!
+    Place your input .vdscript file and frame_log.txt in the same directory. Note: The frame_log.txt should already have been created before the "vdscript_range_adjuster.py" stage!
 
 Configuration
 At the bottom of the script, you'll find the following configurable parameters:
@@ -72,7 +72,7 @@ How to Use the Results
 
 Tips for Optimal Use
 
-    Always run this script on the output from vdscript_range_adjuster_v1.4.1.py to ensure you're working with adjusted, legal cut points.
+    Always run this script on the output from vdscript_range_adjuster.py to ensure you're working with adjusted, legal cut points.
     If you notice unusually small GOP sizes, it might indicate potential issues with your source video or cut points. In such cases, you may want to review your original edits or the source material.
     Keep in mind that different video codecs and encoding settings can result in varying GOP sizes. Always analyze each project individually for the best results.
 
@@ -82,7 +82,7 @@ Troubleshooting
     If the output seems incorrect, double-check your frame_log.txt file to ensure it matches your video file.
     For videos with unusual GOP structures, you may need to manually verify the results against the actual video file.
 
-This script, used in conjunction with vdscript_range_adjuster_v1.4.1.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos. This user guide should provide a comprehensive overview of how to use the 1stGOP_analyzer.py script and how to interpret its results in the context of your workflow with LosslessCut. It explains the purpose, setup, usage, and interpretation of results, which should help users effectively utilize this tool in their video editing process.
+This script, used in conjunction with vdscript_range_adjuster.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos. This user guide should provide a comprehensive overview of how to use the 1stGOP_analyzer.py script and how to interpret its results in the context of your workflow with LosslessCut. It explains the purpose, setup, usage, and interpretation of results, which should help users effectively utilize this tool in their video editing process.
 """
 import re
 
