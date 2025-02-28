@@ -205,10 +205,10 @@ def batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_
 
 # Main execution
 directory = '.'  # Current directory, change if needed
-i_frame_offset = 1
-merge_ranges_option = True
-min_gap_between_ranges = 100
-short_cut_mode = True
+i_frame_offset = 1  # Increase this value to go further back in I-frames
+merge_ranges_option = True  # Set to False to disable merging
+min_gap_between_ranges = 100  # Minimum gap between ranges (in frames)
+short_cut_mode = True  # Set to False for "full GOP mode"
 
 batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
 
