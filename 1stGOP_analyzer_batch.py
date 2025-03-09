@@ -1,9 +1,9 @@
 """
-User Guide for 1stGOP_analyzer.py
+User Guide for 1stGOP_analyzer_batch.py
 Purpose
 This script analyzes VirtualDub script files (.vdscript) to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are converting VirtualDub scripts to LosslessCut project files (.llc) and need to ensure frame-accurate cuts without losing the first GOP of any segment.
 # This script was tested and works with:
-# - Python 3.13.2
+# - Python 3.12.5
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
 # - "FFmpeg" generated frame_log.txt files (the version in LosslessCut 3.63.0)
@@ -18,13 +18,13 @@ Features
 Prerequisites
 
     Python 3.x installed on your system
-    Input .vdscript file (typically output from vdscript_range_adjuster.py)
+    Input .vdscript file (typically output from vdscript_range_adjuster_v1.4.1.py)
     Frame log file (frame_log.txt) containing frame type information
 
 Setup
 
-    Save the script as "1stGOP_analyzer.py" in your working directory.
-    Place your input .vdscript file and frame_log.txt in the same directory. Note: The frame_log.txt should already have been created before the "vdscript_range_adjuster.py" stage!
+    Save the script as "1stGOP_analyzer_batch.py" in your working directory.
+    Place your input .vdscript file and frame_log.txt in the same directory. Note: The frame_log.txt should already have been created before the "vdscript_range_adjuster_v1.4.1.py" stage!
 
 Configuration
 At the bottom of the script, you'll find the following configurable parameters:
@@ -45,7 +45,7 @@ Usage
     Navigate to the directory containing the script and input files.
     Run the script:
 
-    python 1stGOP_analyzer.py
+    python 1stGOP_analyzer_batch.py
 
     The script will process your input file and create an output file (default: gop_info.txt) with GOP size information.
 
@@ -72,7 +72,7 @@ How to Use the Results
 
 Tips for Optimal Use
 
-    Always run this script on the output from vdscript_range_adjuster.py to ensure you're working with adjusted, legal cut points.
+    Always run this script on the output from vdscript_range_adjuster_v1.4.1.py to ensure you're working with adjusted, legal cut points.
     If you notice unusually small GOP sizes, it might indicate potential issues with your source video or cut points. In such cases, you may want to review your original edits or the source material.
     Keep in mind that different video codecs and encoding settings can result in varying GOP sizes. Always analyze each project individually for the best results.
 
@@ -82,8 +82,9 @@ Troubleshooting
     If the output seems incorrect, double-check your frame_log.txt file to ensure it matches your video file.
     For videos with unusual GOP structures, you may need to manually verify the results against the actual video file.
 
-This script, used in conjunction with vdscript_range_adjuster.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos. This user guide should provide a comprehensive overview of how to use the 1stGOP_analyzer.py script and how to interpret its results in the context of your workflow with LosslessCut. It explains the purpose, setup, usage, and interpretation of results, which should help users effectively utilize this tool in their video editing process.
+This script, used in conjunction with vdscript_range_adjuster_v1.4.1.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos. This user guide should provide a comprehensive overview of how to use the 1stGOP_analyzer_batch.py script and how to interpret its results in the context of your workflow with LosslessCut. It explains the purpose, setup, usage, and interpretation of results, which should help users effectively utilize this tool in their video editing process.
 """
+import os
 import re
 
 def read_frame_log(file_path):
@@ -121,24 +122,50 @@ def calculate_gop_sizes(vdscript_file, frame_types):
                     gop_sizes.append(gop_size)
     return gop_sizes
 
-def write_gop_info_to_file(gop_sizes, output_file):
-    if gop_sizes:
-        with open(output_file, 'w') as outfile:
-            for size in gop_sizes:
-                outfile.write(f"{size}\n")
-            outfile.write("---------------------------------------\n")
-            outfile.write(f"Smallest starting GOP: {min(gop_sizes)} frames\n")
-    else:
-        with open(output_file, 'w') as outfile:
-            outfile.write("No ranges available.\n")
+def batch_process_vdscripts(directory, output_file):
+    all_results = []
+    smallest_overall = None
+    smallest_file = None
+    
+    with open(output_file, 'w') as outfile:
+        for filename in os.listdir(directory):
+            if filename.endswith('_adjusted.vdscript'):
+                base_name = filename.replace('_adjusted.vdscript', '')
+                frame_log_file = os.path.join(directory, f"{base_name}_frame_log.txt")
+                vdscript_file = os.path.join(directory, filename)
+                
+                if os.path.exists(frame_log_file):
+                    frame_types = read_frame_log(frame_log_file)
+                    gop_sizes = calculate_gop_sizes(vdscript_file, frame_types)
+                    
+                    if gop_sizes:
+                        # Write the vdscript name and GOP sizes
+                        outfile.write(f"Name: \"{filename}\"\n")
+                        for size in gop_sizes:
+                            outfile.write(f"{size}\n")
+                        
+                        # Calculate and write the smallest GOP size for this vdscript
+                        smallest = min(gop_sizes)
+                        outfile.write(f"\nSmallest starting GOP: {smallest} frames\n")
+                        outfile.write("---------------------------------\n\n")
+                        
+                        # Track the overall smallest GOP size
+                        if smallest_overall is None or smallest < smallest_overall:
+                            smallest_overall = smallest
+                            smallest_file = filename
+                else:
+                    print(f"Skipped: {filename} (No corresponding frame log file found)")
+        
+        # Write the overall smallest GOP size at the end
+        if smallest_overall is not None:
+            outfile.write("--------------------------------------------------\n")
+            outfile.write("--------------------------------------------------\n")
+            outfile.write(f"Smallest starting GOP in all vdscripts: {smallest_overall} frames (\"{smallest_file}\")\n")
 
 # Main execution
-frame_log_file = 'frame_log.txt'
-input_vdscript = 'output_adjusted_i1_m100_scm.vdscript'
+directory = '.'  # Current directory, change if needed
 output_file = 'gop_info.txt'
 
-frame_types = read_frame_log(frame_log_file)
-gop_sizes = calculate_gop_sizes(input_vdscript, frame_types)
-write_gop_info_to_file(gop_sizes, output_file)
+batch_process_vdscripts(directory, output_file)
 
-print("GOP information has been written to gop_info.txt")
+print("Batch processing completed. Results written to gop_info.txt")
