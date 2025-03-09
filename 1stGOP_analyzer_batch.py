@@ -1,43 +1,32 @@
 """
 User Guide for 1stGOP_analyzer_batch.py
 Purpose
-This script analyzes VirtualDub script files (.vdscript) to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are converting VirtualDub scripts to LosslessCut project files (.llc) and need to ensure frame-accurate cuts without losing the first GOP of any segment.
+This script analyzes multiple VirtualDub script files (.vdscript) to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are converting VirtualDub scripts to LosslessCut project files (.llc) and need to ensure frame-accurate cuts without losing the first GOP of any segment.
 # This script was tested and works with:
-# - Python 3.12.5
-# - VirtualDub 1.10.4 .vdscript files
+# - Python 3.13.2
 # - VirtualDub2 (build 44282) .vdscript files
-# - "FFmpeg" generated frame_log.txt files (the version in LosslessCut 3.63.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 
 Features
 
-    Reads frame information from a frame log file
-    Analyzes ranges in a VirtualDub script file
+    Reads frame information from frame log files
+    Analyzes ranges in corresponding VirtualDub script files (must have the same name, but with "_adjusted.vdscript" appended instead of "_frame_log.txt")
     Calculates the size of the starting GOP for each range
     Identifies the smallest starting GOP across all ranges
+    Repeats this process for every "_adjusted.vdscript"
+    Gives final "Smallest starting GOP in all vdscripts" result
+        
 
 Prerequisites
 
     Python 3.x installed on your system
-    Input .vdscript file (typically output from vdscript_range_adjuster_v1.4.1.py)
-    Frame log file (frame_log.txt) containing frame type information
+    Input .vdscript file(s) (output from vdscript_range_adjuster.py)
+    Frame log file(s) (videofilename_frame_log.txt) containing frame type information
 
 Setup
 
     Save the script as "1stGOP_analyzer_batch.py" in your working directory.
-    Place your input .vdscript file and frame_log.txt in the same directory. Note: The frame_log.txt should already have been created before the "vdscript_range_adjuster_v1.4.1.py" stage!
-
-Configuration
-At the bottom of the script, you'll find the following configurable parameters:
-
-frame_log_file = 'frame_log.txt'
-input_vdscript = 'input.vdscript'
-output_file = 'gop_info.txt'
-
-Adjust these parameters as needed:
-
-    frame_log_file: Name of your frame log file
-    input_vdscript: Name of your input VirtualDub script file
-    output_file: Desired name for the output information file
+    Place your input vdscript files and matching frame log files in the same directory. Note: The frame logs should already have been created before the "vdscript_range_adjuster.py" stage!
 
 Usage
 
@@ -47,22 +36,28 @@ Usage
 
     python 1stGOP_analyzer_batch.py
 
-    The script will process your input file and create an output file (default: gop_info.txt) with GOP size information.
-
-Output
-The script generates a text file (default: gop_info.txt) containing:
-
-    Starting GOP size for each range in the input script
-    A separator line
-    The smallest starting GOP size across all ranges
+    The script will process your input files and create an output file (default: gop_info.txt) with GOP size information for all vdscripts which end with "_adjusted.vdscript", & the overall shortest at the very bottom.
 
 Example output:
 
+Name: "video1.mp4_adjusted.vdscript"
 250
 250
-100
----------------------------------------
-Smallest starting GOP: 100 frames
+
+Smallest starting GOP: 250 frames
+---------------------------------
+
+Name: "video2.mp4_adjusted.vdscript"
+138
+200
+17
+
+Smallest starting GOP: 17 frames
+---------------------------------
+
+--------------------------------------------------
+--------------------------------------------------
+Smallest starting GOP in all vdscripts: 17 frames ("video2.mp4_adjusted.vdscript")
 
 How to Use the Results
 
@@ -70,19 +65,16 @@ How to Use the Results
     When adjusting your segments in LosslessCut, ensure that you don't shift any segment forward by more than this number of frames.
     This approach allows you to fine-tune your cuts for frame accuracy while maintaining the integrity of each segment's starting GOP.
 
-Tips for Optimal Use
+Tip for Optimal Use
 
-    Always run this script on the output from vdscript_range_adjuster_v1.4.1.py to ensure you're working with adjusted, legal cut points.
-    If you notice unusually small GOP sizes, it might indicate potential issues with your source video or cut points. In such cases, you may want to review your original edits or the source material.
-    Keep in mind that different video codecs and encoding settings can result in varying GOP sizes. Always analyze each project individually for the best results.
+    Always run this script on the output from vdscript_range_adjuster.py to ensure you're working with adjusted, legal cut points.
 
 Troubleshooting
 
-    If the script fails to run, ensure you have Python 3.x installed and that all file paths are correct.
-    If the output seems incorrect, double-check your frame_log.txt file to ensure it matches your video file.
-    For videos with unusual GOP structures, you may need to manually verify the results against the actual video file.
+    If the script fails to run, ensure you have Python 3.x installed.
+    If the output seems incorrect, double-check your frame log file to ensure it matches your video file.
 
-This script, used in conjunction with vdscript_range_adjuster_v1.4.1.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos. This user guide should provide a comprehensive overview of how to use the 1stGOP_analyzer_batch.py script and how to interpret its results in the context of your workflow with LosslessCut. It explains the purpose, setup, usage, and interpretation of results, which should help users effectively utilize this tool in their video editing process.
+This script, used in conjunction with vdscript_range_adjuster.py, provides a powerful solution for ensuring accurate, lossless cuts when working with LosslessCut, especially for high-resolution content edited using proxy videos.
 """
 import os
 import re
