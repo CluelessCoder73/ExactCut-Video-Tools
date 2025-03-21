@@ -2,8 +2,8 @@
 User Guide for vdscript_range_adjuster.py
 Purpose
 This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to "Cuttermaran" or "LosslessCut" project files. I have created python scripts which can do exactly that, & they are available at https://github.com/CluelessCoder73?tab=repositories
-Now works in batch mode!
-# This script was tested and works with:
+This script now works in batch mode!
+# Tested and works with:
 # - Python 3.12.5
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
@@ -25,54 +25,6 @@ Prerequisites
     Python 3.x installed on your system
     Input .vdscript file(s) from VirtualDub or VirtualDub2
     Frame log file (sourcevideofilename_frame_log.txt) containing frame type information
-
-#####How to edit a 4K video using the proxy method#####
-Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with LosslessCut. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
-other python scripts required:
-vdscript_info (optional)
-vdscript_to_llc
-
-Step 1:
-Put all your source videos into folders according to their frame rates (e.g., 23.976, 25 etc). For the sake of simplicity, for the rest of this guide, I will only refer to one folder, because the method for all folders is the same.
-
-Step 2:
-Create proxy versions of your videos using HandBrake: Use one of the provided custom presets. You may want to raise the "Constant Quality" values, because they are all set at "RF 16". The default "RF 22", or higher will be good enough for most. You may also want to lower the "Resolution Limit", which is set at "720p HD". NOTE: All filters are turned off, so if your video is e.g. interlaced, you will need to enable deinterlacing! DO NOT save to the same folder as your input files!
-
-Step 3:
-Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". Hint: The version in LosslessCut should work just fine. You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
-
-1stGOP_analyzer_batch.py (optional)
-frame_log_extractor.bat
-vdscript_range_adjuster.py
-vdscript_info.py (optional)
-vdscript_to_llc_v1.3.0.py
-
-Step 4:
-Run "frame_log_extractor.bat". Be patient, it will take a long time (about 2x proxy creation time). It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
-
-Step 5:
-Edit your proxy videos with VirtualDub2. You can use 32 or 64 bit, the output vdscript is identical. But for performance, I always use the 64 bit version. You will notice that these proxy versions are really easy to work with - you can scan at high speed through the videos by using SHIFT+LEFT & SHIFT+RIGHT, & you can go even faster by using ALT+LEFT & PGDOWN. Save your work in VirtualDub2 by using CTRL+S to save processing settings. MAKE SURE to check "Include selection and edit list", Otherwise your cuts will NOT be saved!!! Once you do that, it will remain so for future sessions. When editing is complete, the vdscript must be saved as "source video filename" + ".vdscript". So, if your source video is called "whatever.mp4", your final saved vdscript should be called "whatever.mp4.vdscript".
-
-Step 6:
-Run "vdscript_range_adjuster.py". It will process every vdscript it finds, & the outputted files will have "_adjusted.vdscript" appended.
-
-Step 7:
-Run "1stGOP_analyzer_batch.py" (optional - only for perfectionists). The "Smallest starting GOP" value indicates the minimum "minus" value you can enter in the "extra_frames_start" parameter in "vdscript_to_llc_v1.3.0.py" without risking the loss of the first GOP in any segment. Hint: It only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "gop_info.txt".
-
-Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. For "fps", enter the same as reported in LosslessCut for the ORIGINAL video - NOT the proxy! ("advanced view" is required for this). Do not use MediaInfo either, because it sometimes differs slightly from FFmpeg in its handling of frame rates.
-
-Step 9:
-Open "vdscript_to_llc_v1.3.0.py" in a text editor & edit the paths etc. For "fps", see "Step 8". Don't forget it's the "_adjusted" vdscript you're looking for! Then run it. & voila! - you now have a LosslessCut project file!
-
-
-VERY IMPORTANT! - DO NOT get your original videos & proxy videos mixed up!!
-
-VERIFYING THAT THE SOURCE & PROXY MATCH:
-Open your "whatevervideo_frame_log.txt", & go to the 2nd last line (the last line of actual text); Somewhere in this line, it will say, e.g. "n:58357".
-Now, open your proxy video in VirtualDub2, & hit the [End] key. This will bring you to the last frame of the video. The display at the bottom should say, e.g. "Frame 58358". That is the total number of frames in your proxy video, & SHOULD be +1 (in comparison to that last frame reported in the frame log), because in VirtualDub2, the last frame is always an "empty" frame.
-DO NOT compare the proxy with the actual source video itself! The frame counts will often match, but NOT ALWAYS! The important thing (in terms of frame accuracy) is that your frame logs & proxy videos match.
-
-############################################################
 
 Configuration
 At the bottom of the script, you'll find several configurable parameters:
@@ -114,6 +66,59 @@ After generating the adjusted .vdscript file, you can convert it to other format
     Both are available at https://github.com/CluelessCoder73?tab=repositories
 
 This script provides a powerful solution for ensuring accurate, lossless cuts in your video editing workflow, especially when working with proxy videos for high-resolution content. By automating the adjustment of cut points to legal frame boundaries, it saves time and guarantees the integrity of your final edit.
+
+###########################################################
+#######How to edit a 4K video using the proxy method#######
+
+Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with LosslessCut. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
+Software/python scripts required:
+HandBrake
+VirtualDub2
+LosslessCut
+vdscript_info.py (optional)
+vdscript_to_llc_v1.3.0.py
+
+Step 1:
+Put all your source videos into folders according to their frame rates (e.g., 23.976, 25 etc). For the sake of simplicity, for the rest of this guide, I will only refer to one folder, because the method for all folders is the same.
+
+Step 2:
+Create proxy versions of your videos using HandBrake: Use one of the provided custom presets. You may want to raise the "Constant Quality" values, because they are all set at "RF 16". The default "RF 22", or higher will be good enough for most. You may also want to lower the "Resolution Limit", which is set at "720p HD". NOTE: All filters are turned off, so if your video is e.g. interlaced, you will need to enable deinterlacing! DO NOT save to the same folder as your input files!
+
+Step 3:
+Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". Hint: The version in LosslessCut should work just fine. You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
+
+1stGOP_analyzer_batch.py (optional)
+frame_log_extractor.bat
+vdscript_range_adjuster.py
+vdscript_info.py (optional)
+vdscript_to_llc_v1.3.0.py
+
+Step 4:
+Run "frame_log_extractor.bat". Be patient, it will take a long time. It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
+
+Step 5:
+Edit your proxy videos with VirtualDub2. You can use 32 or 64 bit, the output vdscript is identical. But for performance, I always use the 64 bit version. You will notice that these proxy versions are really easy to work with - you can scan at high speed through the videos by using SHIFT+LEFT & SHIFT+RIGHT, & you can go even faster by using ALT+LEFT & PGDOWN. Save your work in VirtualDub2 by using CTRL+S to save processing settings. MAKE SURE to check "Include selection and edit list", Otherwise your cuts will NOT be saved!!! Once you do that, it will remain so for future sessions. When editing is complete, the vdscript must be saved as "source video filename" + ".vdscript". So, if your source video is called "whatever.mp4", your final saved vdscript should be called "whatever.mp4.vdscript".
+
+Step 6:
+Run "vdscript_range_adjuster.py". It will process every vdscript it finds, & the outputted files will have "_adjusted.vdscript" appended.
+
+Step 7:
+Run "1stGOP_analyzer_batch.py" (optional - only for perfectionists). The "Smallest starting GOP" value indicates the minimum "minus" value you can enter in the "extra_frames_start" parameter in "vdscript_to_llc_v1.3.0.py" without risking the loss of the first GOP in any segment. Hint: It only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "gop_info.txt".
+
+Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. For "fps", enter the same as reported in LosslessCut for the ORIGINAL video - NOT the proxy! ("advanced view" is required for this). Do not use MediaInfo either, because it sometimes differs slightly from FFmpeg in its handling of frame rates.
+
+Step 9:
+Open "vdscript_to_llc_v1.3.0.py" in a text editor & edit the paths etc. For "fps", see "Step 8". Don't forget it's the "_adjusted" vdscript you're looking for! Then run it. & voila! - you now have a LosslessCut project file!
+
+###########################################################
+###########################################################
+
+VERY IMPORTANT! - DO NOT get your original videos & proxy videos mixed up!!
+
+VERIFYING THAT THE SOURCE & PROXY MATCH:
+Open your "whatevervideo_frame_log.txt", & go to the 2nd last line (the last line of actual text); Somewhere in this line, it will say, e.g. "n:58357".
+Now, open your proxy video in VirtualDub2, & hit the [End] key. This will bring you to the last frame of the video. The display at the bottom should say, e.g. "Frame 58358". That is the total number of frames in your proxy video, & SHOULD be +1 (in comparison to that last frame reported in the frame log), because in VirtualDub2, the last frame is always an "empty" frame.
+DO NOT compare the proxy with the actual source video itself! The frame counts will often match, but NOT ALWAYS! The important thing (in terms of frame accuracy) is that your frame logs & proxy videos match.
 """
 import os
 import re
