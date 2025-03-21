@@ -26,7 +26,7 @@ Prerequisites
 Setup
 
     Save the script as "1stGOP_analyzer_batch.py" in your working directory.
-    Place your input vdscript files and matching frame log files in the same directory. Note: The frame logs should already have been created before the "vdscript_range_adjuster.py" stage!
+    Place your input vdscript files and matching frame log files in the same directory.
 
 Usage
 
