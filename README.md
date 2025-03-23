@@ -21,7 +21,7 @@ Alternatively, you can also adjust the endpoint to the last P-frame before the n
 Prerequisites
 
 Python 3.x installed on your system
-Input .vdscript file(s) from VirtualDub or VirtualDub2
+Input .vdscript file(s) from VirtualDub or VirtualDub2 (sourcevideofilename.vdscript)
 Frame log file (sourcevideofilename_frame_log.txt) containing frame type information
 
 Configuration
