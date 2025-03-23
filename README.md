@@ -2,10 +2,10 @@ vdscript_range_adjuster
 This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to "Cuttermaran" or "LosslessCut" project files. I have created python scripts which can do exactly that, & they are available at https://github.com/CluelessCoder73?tab=repositories
 This script now works in batch mode!
 Tested and works with:
-- Python 3.12.5
+- Python 3.13.2
 - VirtualDub 1.10.4 .vdscript files
 - VirtualDub2 (build 44282) .vdscript files
-- "FFmpeg" generated frame_log.txt files (the version in LosslessCut 3.63.0)
+- "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 
 Features:
 
