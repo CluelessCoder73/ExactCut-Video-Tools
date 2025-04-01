@@ -7,7 +7,7 @@ This script now works in batch mode!
 # - Python 3.13.2
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
-# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.65.0)
 
 Features:
 
@@ -76,7 +76,7 @@ HandBrake
 VirtualDub2
 LosslessCut
 vdscript_info.py (optional)
-vdscript_to_llc_v1.3.0.py
+vdscript_to_llc.py
 
 Step 1:
 Put all your source videos into folders according to their frame rates (e.g., 23.976, 25 etc). For the sake of simplicity, for the rest of this guide, I will only refer to one folder, because the method for all folders is the same.
@@ -91,7 +91,7 @@ Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.e
 frame_log_extractor.bat
 vdscript_range_adjuster.py
 vdscript_info.py (optional)
-vdscript_to_llc_v1.3.0.py
+vdscript_to_llc.py
 
 Step 4:
 Run "frame_log_extractor.bat". Be patient, it will take a long time. It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
@@ -103,12 +103,12 @@ Step 6:
 Run "vdscript_range_adjuster.py". It will process every vdscript it finds, & the outputted files will have "_adjusted.vdscript" appended.
 
 Step 7:
-Run "1stGOP_analyzer_batch.py" (optional - only for perfectionists). The "Smallest starting GOP" value indicates the minimum "minus" value you can enter in the "extra_frames_start" parameter in "vdscript_to_llc_v1.3.0.py" without risking the loss of the first GOP in any segment. Hint: It only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "gop_info.txt".
+Run "1stGOP_analyzer_batch.py" (optional - only for perfectionists). The "Smallest starting GOP" value indicates the minimum "minus" value you can enter in the "extra_frames_start" parameter in "vdscript_to_llc.py" without risking the loss of the first GOP in any segment. Hint: It only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "gop_info.txt".
 
 Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. For "fps", enter the same as reported in LosslessCut for the ORIGINAL video - NOT the proxy! ("advanced view" is required for this). Do not use MediaInfo either, because it sometimes differs slightly from FFmpeg in its handling of frame rates.
 
 Step 9:
-Open "vdscript_to_llc_v1.3.0.py" in a text editor & edit the paths etc. For "fps", see "Step 8". Don't forget it's the "_adjusted" vdscript you're looking for! Then run it. & voila! - you now have a LosslessCut project file!
+Open "vdscript_to_llc.py" in a text editor & edit the paths etc. For "fps", see "Step 8". Don't forget it's the "_adjusted" vdscript you're looking for! Then run it. & voila! - you now have a LosslessCut project file!
 
 ###########################################################
 ###########################################################
@@ -241,7 +241,7 @@ directory = '.'  # Current directory, change if needed
 i_frame_offset = 1  # Increase this value to go further back in I-frames
 merge_ranges_option = True  # Set to False to disable merging
 min_gap_between_ranges = 100  # Minimum gap between ranges (in frames)
-short_cut_mode = True  # Set to False for "full GOP mode"
+short_cut_mode = False  # Set to False for "full GOP mode"
 
 batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
 
