@@ -1,3 +1,79 @@
+"""
+User Guide for vdscript_to_mkvtoolnix.py
+Features
+
+    Processes all *_adjusted.vdscript files in current directory
+
+    Generates single batch_cutlist.txt file
+
+    Optional merge mode with + prefixes
+
+    Maintains original file names in output
+
+Requirements
+
+    Python 3.x
+
+    VirtualDub/VirtualDub2 generated *_adjusted.vdscript files
+
+Usage
+
+    Place script and *_adjusted.vdscript files in same directory
+
+    Run command prompt in directory
+
+    Execute one of:
+
+    # Basic mode (separate parts)
+    python vdscript_to_mkvtoolnix.py
+
+    # Merge mode (concatenated parts)
+    python vdscript_to_mkvtoolnix.py --merge
+
+Output Format
+
+Example batch_cutlist.txt:
+
+"video1_adjusted.vdscript"
+0-249,750-1249,1500-1766
+
+"video2_adjusted.vdscript"
+500-1249,1750-1999,3000-3499
+
+With merge enabled:
+
+"video1_adjusted.vdscript"
+0-249,+750-1249,+1500-1766
+
+"video2_adjusted.vdscript"
+500-1249,+1750-1999,+3000-3499
+
+Using with MKVToolNix GUI
+
+    Open MKVToolNix GUI
+
+    Add your video file
+
+    Go to "Output" tab
+
+    Under "Splitting":
+
+        Select "By parts based on frame/field numbers"
+
+        Paste the cutlist string (without quotes/filename) into the input field
+
+    Start multiplexing
+
+Notes
+
+    The script ignores non-matching files
+
+    Empty ranges are skipped
+
+    Frame numbers are 0-based
+
+    Merge mode adds + to create single output file with concatenated segments
+"""
 import os
 import re
 import argparse
