@@ -1,5 +1,10 @@
 """
 User Guide for vdscript_to_mkvtoolnix.py
+# Tested and works with:
+# - Python 3.13.2
+# - VirtualDub2 (build 44282) .vdscript files
+# - MKVToolNix GUI v91.0 ("Signs") 64-bit
+
 Features
 
     Processes all *_adjusted.vdscript files in current directory
