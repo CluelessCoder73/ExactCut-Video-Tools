@@ -70,11 +70,11 @@ This script provides a powerful solution for ensuring accurate, lossless cuts in
 How to edit a 4K video using the proxy method:
 
 Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with MKVToolNix GUI. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
-Software/python scripts required:
-HandBrake
-VirtualDub2
-MKVToolNix GUI
-vdscript_info.py (optional) https://github.com/CluelessCoder73/vdscript_info
+ Software/python scripts required:
+ - HandBrake
+ - VirtualDub2
+ - MKVToolNix GUI
+ - vdscript_info.py (optional) https://github.com/CluelessCoder73/vdscript_info
 
 Step 1: Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
 
