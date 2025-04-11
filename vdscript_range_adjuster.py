@@ -62,7 +62,7 @@ Converting Output to Other Formats
 After generating the adjusted .vdscript file, you can convert it to other formats:
 
     For Cuttermaran: Use "vdscript_to_cpf" to create a .cpf file.
-    For LosslessCut: Use "vdscript_to_llc". WARNING: NOT frame-accurate!
+    For LosslessCut: Use "vdscript_to_llc". WARNING: not always frame-accurate!
     For MKVToolNix GUI: Use "vdscript_to_mkvtoolnix.py" (included).
     All are available at https://github.com/CluelessCoder73?tab=repositories
 
@@ -71,14 +71,14 @@ This script provides a powerful solution for ensuring accurate, lossless cuts in
 ###########################################################
 #######How to edit a 4K video using the proxy method#######
 
-Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with mkvtoolnix-gui. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
+Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with MKVToolNix GUI. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
 Software/python scripts required:
 HandBrake
 VirtualDub2
 MKVToolNix GUI
 vdscript_info.py (optional) https://github.com/CluelessCoder73/vdscript_info
 
-Step 1: Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). In those cases, MKVToolNix GUI would not be required.
+Step 1: Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
 
 Step 2:
 NOTE: This step is only necessary if you plan on using "vdscript_info.py"!
@@ -88,7 +88,7 @@ Step 3:
 Create proxy versions of your videos using HandBrake: Use one of the provided custom presets. You may want to raise the "Constant Quality" values, because they are all set at "RF 16". The default "RF 22", or higher will be good enough for most. You may also want to lower the "Resolution Limit", which is set at "720p HD". NOTE: All filters are turned off, so if your video is e.g. interlaced, you will need to enable deinterlacing! DO NOT save to the same folder as your input files!
 
 Step 4:
-Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". Hint: The version in LosslessCut should work just fine. You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
+Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
 
 frame_log_extractor.bat
 vdscript_range_adjuster.py
@@ -104,10 +104,13 @@ Edit your proxy videos with VirtualDub2. You can use 32 or 64 bit, the output vd
 Step 7:
 Run "vdscript_range_adjuster.py". It will process every vdscript it finds, & the outputted files will have "_adjusted.vdscript" appended.
 
-Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. This tool can be also be useful for verifying that the final output has the correct number of frames.
+Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. This tool can also be useful for verifying that the final output has the correct number of frames.
 
-Step 9:
-Run vdscript_to_mkvtoolnix.py to generate the cutlists. Please read instructions first. Hint: It only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "batch_cutlist.txt".
+Step 9: Execute the following:
+
+python vdscript_to_mkvtoolnix.py --merge
+
+Omit " --merge" for non-concatenated parts instead (can be useful for analysing each individual part, to determine if frames have been lost or not). Hint: "vdscript_to_mkvtoolnix.py" only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "batch_cutlist.txt".
 
 Step 10:
 Open MKVToolNix GUI. Add your MP4 video file (NOT the proxy!). Go to "Output" tab. Under "Splitting", select "By parts based on frame/field numbers". Paste the cutlist string (without quotes/filename) into the input field. Start multiplexing. After the operation is complete, you can mux it to a different container if desired. NOTE: The output may have a few extra frames compared to the input. If you want the EXACT number of frames as the input, you will need to disable the audio in MKVToolNix GUI, & process the audio separately (the audio will need to be re-encoded). This can be achieved by opening the original MP4 video in VirtualDub2, load the "_adjusted" vdscript, choose audio "Full processing mode", & save it as wav. You can then compress it using Audacity or any other audio conversion program. Then mux the "video only" MKV & audio into your desired format.
