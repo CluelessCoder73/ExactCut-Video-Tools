@@ -88,10 +88,10 @@ Create proxy versions of your videos using HandBrake: Use one of the provided cu
 Step 4:
 Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
 
-frame_log_extractor.bat
-vdscript_range_adjuster.py
-vdscript_info.py (optional)
-vdscript_to_mkvtoolnix.py
+ - frame_log_extractor.bat
+ - vdscript_range_adjuster.py
+ - vdscript_info.py (optional)
+ - vdscript_to_mkvtoolnix.py
 
 Step 5:
 Run "frame_log_extractor.bat". Be patient, it will take a long time. It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
