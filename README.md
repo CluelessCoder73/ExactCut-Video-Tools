@@ -76,7 +76,8 @@ Here's my guide on editing a 4K video in VirtualDub2, & saving the final export 
  - MKVToolNix GUI
  - vdscript_info.py (optional) https://github.com/CluelessCoder73/vdscript_info
 
-Step 1: Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
+Step 1:
+Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
 
 Step 2:
 NOTE: This step is only necessary if you plan on using "vdscript_info.py"!
@@ -100,11 +101,13 @@ Step 6:
 Edit your proxy videos with VirtualDub2. You can use 32 or 64 bit, the output vdscript is identical. But for performance, I always use the 64 bit version. You will notice that these proxy versions are really easy to work with - you can scan at high speed through the videos by using SHIFT+LEFT & SHIFT+RIGHT, & you can go even faster by using ALT+LEFT & PGDOWN. Save your work in VirtualDub2 by using CTRL+S to save processing settings. MAKE SURE to check "Include selection and edit list", Otherwise your cuts will NOT be saved!!! Once you do that, it will remain so for future sessions. When editing is complete, the vdscript must be saved as "source video filename" + ".vdscript". So, if your source video is called "whatever.mp4", your final saved vdscript should be called "whatever.mp4.vdscript".
 
 Step 7:
-Run "vdscript_range_adjuster.py". It will process every vdscript it finds, & the outputted files will have "_adjusted.vdscript" appended.
+Run "vdscript_range_adjuster.py". It will process every vdscript (which has a corresponding frame log file), & the outputted files will have "_adjusted.vdscript" appended.
 
-Step 8: Run vdscript_info.py (optional) for a detailed "before & after" comparison. This tool can also be useful for verifying that the final output has the correct number of frames.
+Step 8:
+Run vdscript_info.py (optional) for a detailed "before & after" comparison. This tool can also be useful for verifying that the final output has the correct number of frames.
 
-Step 9: Execute the following:
+Step 9:
+Execute the following:
 
 python vdscript_to_mkvtoolnix.py --merge
 
