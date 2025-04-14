@@ -15,8 +15,8 @@ Features:
     Alternatively, you can also adjust the start point to the "2nd" previous I-frame (the I-frame before the previous one). In that case, if the start point is already on an I-frame, it is instead adjusted to just the previous I-frame. Can be useful when working with x265 & other "open GOP" codecs, where cut-in points end up corrupted, & the video doesn't play right again until the next I-frame.
     In fact, you can go furter back in I-frames, but I don't see any need (so far) to go any further back than 2.
 
-# - Adjusts endpoints to the next P or I-frame. If the endpoint is already on a P or I-frame, it is left untouched.
-    Alternatively, you can also adjust the endpoint to the last P-frame before the next I-frame ("short_cut_mode = False"). In that case, if, e.g., the endpoint is already on the last P-frame before the next I-frame, it is left untouched.
+	# - Adjusts endpoints to the last P-frame before the next I-frame. If the endpoint is already on the last P-frame before the next I-frame, it is left untouched.
+    Alternatively, you can adjust the endpoints to just the next P or I-frame ("short_cut_mode = True"). In that case, if, e.g., the endpoint is already on a P or I-frame, it is left untouched.
     
 # - Merges overlapping or close ranges (optional)
 
@@ -62,7 +62,7 @@ Converting Output to Other Formats
 After generating the adjusted .vdscript file, you can convert it to other formats:
 
     For Cuttermaran: Use "vdscript_to_cpf" to create a .cpf file.
-    For LosslessCut: Use "vdscript_to_llc". WARNING: not always frame-accurate!
+    For LosslessCut: Use "vdscript_to_llc". WARNING: not frame-accurate!
     For MKVToolNix GUI: Use "vdscript_to_mkvtoolnix.py" (included).
     All are available at https://github.com/CluelessCoder73?tab=repositories
 
