@@ -24,7 +24,7 @@ import re
 # 2. Run the script.
 # 3. Enter the correct frame rate when asked.
 # 4. A text file will be created for each vdscript, with the same name, 
-#    but "_info.txt" will be appended to each.
+#    but with "_info.txt" appended.
 #
 # Example:
 # VirtualDub.subset.AddRange(446,444);
