@@ -74,7 +74,6 @@ Here's my guide on editing a 4K video in VirtualDub2, & saving the final export 
  - HandBrake
  - VirtualDub2
  - MKVToolNix GUI
- - vdscript_info.py (optional) https://github.com/CluelessCoder73/vdscript_info
 
 Step 1:
 Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
@@ -90,8 +89,8 @@ Step 4:
 Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
 
  - frame_log_extractor.bat
- - vdscript_range_adjuster.py
  - vdscript_info.py (optional)
+ - vdscript_range_adjuster.py
  - vdscript_to_mkvtoolnix.py
 
 Step 5:
