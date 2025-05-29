@@ -70,7 +70,7 @@ This script provides a powerful solution for ensuring accurate, lossless cuts in
 How to edit a 4K video using the proxy method:
 
 Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with MKVToolNix GUI. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
- Software/python scripts required:
+ Software required:
  - HandBrake
  - VirtualDub2
  - MKVToolNix GUI
