@@ -1,5 +1,4 @@
 # vdscript_range_adjuster
-Purpose
 This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to a "Cuttermaran" project file, or an "MKVToolNix GUI" cutlist via "vdscript_to_mkvtoolnix.py" (included). For Cuttermaran, "vdscript_to_cpf" is available at https://github.com/CluelessCoder73/vdscript_to_cpf
 This script now works in batch mode!
  Tested and works with:
