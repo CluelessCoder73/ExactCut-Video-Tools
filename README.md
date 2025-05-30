@@ -25,6 +25,7 @@ Prerequisites
     Frame log file (sourcevideofilename_frame_log.txt) containing frame type information
 
 Configuration
+
 At the bottom of the script, you'll find several configurable parameters:
 
 directory = '.'
