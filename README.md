@@ -29,9 +29,13 @@ Configuration
 At the bottom of the script, you'll find several configurable parameters:
 
 directory = '.'
+
 i_frame_offset = 1
+
 merge_ranges_option = True
+
 min_gap_between_ranges = 100
+
 short_cut_mode = False
 
 Adjust these parameters as needed:
