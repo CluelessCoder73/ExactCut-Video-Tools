@@ -43,6 +43,7 @@ Adjust these parameters as needed:
     short_cut_mode: Set to True to enable moving endpoints to the next P or I-frame, False for "full GOP mode"
 
 Output
+
 The script generates new .vdscript files with the adjusted cut points. These files can then be used directly in VirtualDub or VirtualDub2 (depending on which version created the original vdscript files!), or converted to other formats like .cpf (Cuttermaran project files) or "MKVToolNix GUI" cutlists.
 Tips for Optimal Use
 
@@ -88,10 +89,13 @@ Create proxy versions of your videos using HandBrake: Use one of the provided cu
 Step 4:
 Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
 
- - frame_log_extractor.bat
- - vdscript_info.py (optional)
- - vdscript_range_adjuster.py
- - vdscript_to_mkvtoolnix.py
+frame_log_extractor.bat
+
+vdscript_info.py (optional)
+
+vdscript_range_adjuster.py
+
+vdscript_to_mkvtoolnix.py
 
 Step 5:
 Run "frame_log_extractor.bat". Be patient, it will take a long time. It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
