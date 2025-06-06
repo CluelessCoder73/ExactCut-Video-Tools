@@ -1,0 +1,5 @@
+Python: Version 3.13.2 or newer (tested with this version, others may work).
+FFmpeg: A recent build (for remuxing & also generating frame logs).
+VirtualDub2: For creating your initial cutlists.
+HandBrake: For proxy video creation.
+MKVToolNix GUI: For exporting the edited video.
