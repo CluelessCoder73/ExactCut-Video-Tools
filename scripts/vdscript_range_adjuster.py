@@ -23,8 +23,8 @@ Features:
 Prerequisites
 
     Python 3.x installed on your system
-    Input .vdscript file(s) from VirtualDub or VirtualDub2 (sourcevideofilename.vdscript)
-    Frame log file (sourcevideofilename_frame_log.txt) containing frame type information
+    Input .vdscript file(s) from VirtualDub or VirtualDub2 (source_video_filename.extension.vdscript)
+    Frame log file (source_video_filename.extension_frame_log.txt) containing frame type information
 
 Configuration
 At the bottom of the script, you'll find several configurable parameters:
@@ -67,65 +67,6 @@ After generating the adjusted .vdscript file, you can convert it to other format
     All are available at https://github.com/CluelessCoder73?tab=repositories
 
 This script provides a powerful solution for ensuring accurate, lossless cuts in your video editing workflow, especially when working with proxy videos for high-resolution content. By automating the adjustment of cut points to legal frame boundaries, it saves time and guarantees the integrity of your final edit.
-
-###########################################################
-#######How to edit a 4K video using the proxy method#######
-
-Here's my guide on editing a 4K video in VirtualDub2, & saving the final export with MKVToolNix GUI. Because this method uses proxy videos, it does not require a high-end PC! NOTE: If your proxy videos are lagging in VirtualDub2, you will need to reduce the max resolution for the proxy presets!
-Software required:
-HandBrake
-VirtualDub2
-MKVToolNix GUI
-
-Step 1:
-Make sure your videos are MP4. If they are not, remux them to that format (LosslessCut can do this). This step is necessary for frame accuracy. The only exceptions to this rule are MPEG-1/2 (in which case you should be using "vdscript_to_cpf"), & DivX/XviD AVI files (in which case you should be using VirtualDub itself). For codecs which are not supported by the MP4 format, you can try MKV, but just be aware that you may lose frames. The number is small, but it goes against the very premise behind the creation of these scripts: "Cut as close to the wanted ranges as possible without losing ANY frames!".
-
-Step 2:
-NOTE: This step is only necessary if you plan on using "vdscript_info.py"!
-Put all your source videos into folders according to their frame rates (e.g., 23.976, 25 etc). For the sake of simplicity, for the rest of this guide, I will only refer to one folder, because the method for all folders is the same.
-
-Step 3:
-Create proxy versions of your videos using HandBrake: Use one of the provided custom presets. You may want to raise the "Constant Quality" values, because they are all set at "RF 16". The default "RF 22", or higher will be good enough for most. You may also want to lower the "Resolution Limit", which is set at "720p HD". NOTE: All filters are turned off, so if your video is e.g. interlaced, you will need to enable deinterlacing! DO NOT save to the same folder as your input files!
-
-Step 4:
-Open "frame_log_extractor.bat" in a text editor, & specify the path to "ffmpeg.exe". You can now save the modified version of it for future use. Now copy the following scripts into your "source videos" folder:
-
-frame_log_extractor.bat
-vdscript_info.py (optional)
-vdscript_range_adjuster.py
-vdscript_to_mkvtoolnix.py
-
-Step 5:
-Run "frame_log_extractor.bat". Be patient, it will take a long time. It will process every video it finds in the folder. Each frame log file will have the same name as its corresponding video (including extension), with "_frame_log.txt" appended.
-
-Step 6:
-Edit your proxy videos with VirtualDub2. You can use 32 or 64 bit, the output vdscript is identical. But for performance, I always use the 64 bit version. You will notice that these proxy versions are really easy to work with - you can scan at high speed through the videos by using SHIFT+LEFT & SHIFT+RIGHT, & you can go even faster by using ALT+LEFT & PGDOWN. Save your work in VirtualDub2 by using CTRL+S to save processing settings. MAKE SURE to check "Include selection and edit list", Otherwise your cuts will NOT be saved!!! Once you do that, it will remain so for future sessions. When editing is complete, the vdscript must be saved as "source video filename" + ".vdscript". So, if your source video is called "whatever.mp4", your final saved vdscript should be called "whatever.mp4.vdscript".
-
-Step 7:
-Run "vdscript_range_adjuster.py". It will process every vdscript (which has a corresponding frame log file), & the outputted files will have "_adjusted.vdscript" appended.
-
-Step 8:
-Run vdscript_info.py (optional) for a detailed "before & after" comparison. This tool can also be useful for verifying that the final output has the correct number of frames.
-
-Step 9:
-Execute the following:
-
-python vdscript_to_mkvtoolnix.py --merge
-
-Omit " --merge" for non-concatenated parts instead (can be useful for analysing each individual part, to determine if frames have been lost or not). Hint: "vdscript_to_mkvtoolnix.py" only processes files with "_adjusted.vdscript" appended, & it outputs a single file called "batch_cutlist.txt".
-
-Step 10:
-Open MKVToolNix GUI. Add your MP4 video file (NOT the proxy!). Go to "Output" tab. Under "Splitting", select "By parts based on frame/field numbers". Paste the cutlist string (without quotes/filename) into the input field. Start multiplexing. After the operation is complete, you can mux it to a different container if desired. NOTE: The output may have a few extra frames compared to the input. If you want the EXACT number of frames as the input, you will need to disable the audio in MKVToolNix GUI, & process the audio separately (the audio will need to be re-encoded). This can be achieved by opening the original MP4 video in VirtualDub2, load the "_adjusted" vdscript, choose audio "Full processing mode", & save it as wav. You can then compress it using Audacity or any other audio conversion program. Then mux the "video only" MKV & audio into your desired format.
-
-###########################################################
-###########################################################
-
-VERY IMPORTANT! - DO NOT get your original videos & proxy videos mixed up!!
-
-VERIFYING THAT THE SOURCE & PROXY MATCH:
-Open your "whatevervideo_frame_log.txt", & go to the 2nd last line (the last line of actual text); Somewhere in this line, it will say, e.g. "n:58357".
-Now, open your proxy video in VirtualDub2, & hit the [End] key. This will bring you to the last frame of the video. The display at the bottom should say, e.g. "Frame 58358". That is the total number of frames in your proxy video, & SHOULD be +1 (in comparison to that last frame reported in the frame log), because in VirtualDub2, the last frame is always an "empty" frame.
-DO NOT compare the proxy with the actual source video itself! The frame counts will often match, but NOT ALWAYS! The important thing (in terms of frame accuracy) is that your frame logs & proxy videos match.
 """
 import os
 import re
