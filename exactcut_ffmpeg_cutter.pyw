@@ -98,17 +98,16 @@ class FFmpegCutterApp:
 
         self.start_offset_var = tk.IntVar(value=1)
         self.end_offset_var = tk.IntVar(value=0)
-        self.audio_mode_var = tk.StringVar(value="Copy")
+        self.audio_mode_var = tk.StringVar(value="Copy") # Default
         self.audio_bitrate_var = tk.StringVar(value="128")
-        self.container_mode_var = tk.StringVar(value="Same as source")
+        self.container_mode_var = tk.StringVar(value="Same as source") # Default
 
         self.progress_var = tk.DoubleVar()
         self.time_remaining_var = tk.StringVar(value="")
         self.stop_event = threading.Event()
 
-        # New: Directory selection variable
         self.selected_dir_var = tk.StringVar()
-        self.load_last_directory() # Load last directory on startup
+        self.load_last_directory()
 
         self.build_ui()
         self.add_help_button()
@@ -119,7 +118,7 @@ class FFmpegCutterApp:
         if Path(last_dir).is_dir():
             self.selected_dir_var.set(last_dir)
         else:
-            self.selected_dir_var.set(str(Path(__file__).parent)) # Default to script directory if last_dir is invalid
+            self.selected_dir_var.set(str(Path(__file__).parent))
 
     def save_last_directory(self, path):
         config = {"last_directory": path}
@@ -130,7 +129,7 @@ class FFmpegCutterApp:
         chosen_dir = filedialog.askdirectory(initialdir=initial_dir, title="Select Folder Containing Video and Cutlist Files")
         if chosen_dir:
             self.selected_dir_var.set(chosen_dir)
-            self.save_last_directory(chosen_dir) # Save the newly selected directory
+            self.save_last_directory(chosen_dir)
 
     def build_ui(self):
         padding = {"padx": 5, "pady": 5}
@@ -138,7 +137,7 @@ class FFmpegCutterApp:
         frame = ttk.Frame(self.root)
         frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-        # New: Directory Selection UI
+        # Directory Selection UI
         ttk.Label(frame, text="Source Folder:").grid(row=0, column=0, sticky=tk.W, **padding)
         self.dir_entry = ttk.Entry(frame, textvariable=self.selected_dir_var, state="readonly", width=50)
         self.dir_entry.grid(row=0, column=1, columnspan=2, sticky=(tk.W, tk.E), **padding)
@@ -147,7 +146,6 @@ class FFmpegCutterApp:
         browse_button = ttk.Button(frame, text="Browse", command=self.browse_directory)
         browse_button.grid(row=0, column=3, sticky=tk.W, **padding)
         ToolTip(browse_button, "Select the folder containing your video and cutlist files.")
-
 
         ttk.Label(frame, text="Start Frame Offset:").grid(row=1, column=0, sticky=tk.W, **padding)
         start_entry = ttk.Entry(frame, textvariable=self.start_offset_var, width=6)
@@ -160,22 +158,25 @@ class FFmpegCutterApp:
         ToolTip(end_entry, "Shift the end of each segment forward by this many frames.")
 
         ttk.Label(frame, text="Audio Mode:").grid(row=2, column=0, sticky=tk.W, **padding)
-        audio_menu = ttk.Combobox(frame, textvariable=self.audio_mode_var, values=["Copy", "AAC", "MP3"], state="readonly", width=10)
-        audio_menu.grid(row=2, column=1, sticky=tk.W, **padding)
-        audio_menu.bind("<<ComboboxSelected>>", self.toggle_bitrate_visibility)
-        ToolTip(audio_menu, "Choose whether to copy audio (lossless) or re-encode.")
+        # Updated: Added "WAV" to the audio mode options
+        self.audio_menu = ttk.Combobox(frame, textvariable=self.audio_mode_var, values=["Copy", "AAC", "MP3", "WAV"], state="readonly", width=10)
+        self.audio_menu.grid(row=2, column=1, sticky=tk.W, **padding)
+        self.audio_menu.bind("<<ComboboxSelected>>", self.on_audio_mode_change) # Bind to new consolidated function
+        ToolTip(self.audio_menu, "Choose whether to copy audio (lossless) or re-encode. WAV is uncompressed.")
 
         self.bitrate_label = ttk.Label(frame, text="Bitrate (kbps):")
         self.bitrate_label.grid(row=2, column=2, sticky=tk.W, **padding)
 
         self.bitrate_menu = ttk.Combobox(frame, textvariable=self.audio_bitrate_var, values=["128", "160", "192"], state="readonly", width=6)
         self.bitrate_menu.grid(row=2, column=3, sticky=tk.W, **padding)
-        ToolTip(self.bitrate_menu, "Choose the bitrate to use if re-encoding audio.")
+        ToolTip(self.bitrate_menu, "Choose the bitrate to use if re-encoding audio. Not applicable for Copy or WAV modes.")
 
         ttk.Label(frame, text="Output Container:").grid(row=3, column=0, sticky=tk.W, **padding)
-        container_menu = ttk.Combobox(frame, textvariable=self.container_mode_var, values=["Same as source", "MP4", "MOV", "MKV"], state="readonly", width=15)
-        container_menu.grid(row=3, column=1, columnspan=3, sticky=tk.W, **padding)
-        ToolTip(container_menu, "Choose the output file format (container type).")
+        # Stored reference to container_menu for state changes
+        self.container_menu = ttk.Combobox(frame, textvariable=self.container_mode_var, values=["Same as source", "MP4", "MOV", "MKV"], state="readonly", width=15)
+        self.container_menu.grid(row=3, column=1, columnspan=3, sticky=tk.W, **padding)
+        self.container_menu.bind("<<ComboboxSelected>>", self.on_container_mode_change) # Bind to new consolidated function
+        ToolTip(self.container_menu, "Choose the output file format (container type). MKV is recommended for WAV audio.")
 
         ttk.Button(frame, text="Start Cutting", command=self.start_cutting).grid(row=4, column=0, pady=10)
         ttk.Button(frame, text="Cancel", command=self.cancel_processing).grid(row=4, column=1, pady=10)
@@ -183,16 +184,37 @@ class FFmpegCutterApp:
         ttk.Progressbar(frame, variable=self.progress_var, maximum=100).grid(row=5, column=0, columnspan=4, sticky="we", **padding)
         ttk.Label(frame, textvariable=self.time_remaining_var).grid(row=6, column=0, columnspan=4, sticky=tk.W, **padding)
 
-        self.toggle_bitrate_visibility()
+        # Initial call to set correct states
+        self.on_audio_mode_change() # Use the new function for initial setup
 
-    def toggle_bitrate_visibility(self, *args):
+    def on_audio_mode_change(self, *args):
+        self.toggle_bitrate_visibility()
+        self.toggle_container_for_wav()
+
+    def on_container_mode_change(self, *args):
+        # This will mainly be used if we need to react to container changes
+        # independently, but for WAV, audio mode change is primary.
+        pass
+
+    def toggle_bitrate_visibility(self):
         mode = self.audio_mode_var.get().lower()
-        if mode == "copy":
+        if mode in ["copy", "wav"]: # Added "wav"
             self.bitrate_label.grid_remove()
             self.bitrate_menu.grid_remove()
         else:
             self.bitrate_label.grid()
             self.bitrate_menu.grid()
+
+    def toggle_container_for_wav(self):
+        current_audio_mode = self.audio_mode_var.get()
+        if current_audio_mode == "WAV":
+            # If WAV is selected, force container to MKV and disable selection
+            if self.container_mode_var.get() != "MKV":
+                self.container_mode_var.set("MKV")
+            self.container_menu.config(state="disabled")
+        else:
+            # Re-enable container selection for other audio modes
+            self.container_menu.config(state="readonly")
 
     def cancel_processing(self):
         self.stop_event.set()
@@ -201,7 +223,6 @@ class FFmpegCutterApp:
         threading.Thread(target=self.process_cutlists).start()
 
     def process_cutlists(self):
-        # Use the selected directory instead of script_dir
         source_dir = Path(self.selected_dir_var.get())
         if not source_dir.is_dir():
             messagebox.showerror("Invalid Folder", "Please select a valid source folder.")
@@ -213,7 +234,7 @@ class FFmpegCutterApp:
             return
 
         timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
-        log_file_path = source_dir / LOG_FILENAME_TEMPLATE.format(timestamp=timestamp) # Log file in source dir
+        log_file_path = source_dir / LOG_FILENAME_TEMPLATE.format(timestamp=timestamp)
         total_segments = 0
         for cutlist_file in cutlist_files:
             segments = parse_timecode_cutlist(cutlist_file)
@@ -240,7 +261,7 @@ class FFmpegCutterApp:
                     continue
 
                 input_file_name = cutlist_path.name.replace(CUTLIST_SUFFIX, "")
-                input_file = source_dir / input_file_name # Input file in source dir
+                input_file = source_dir / input_file_name
                 if not input_file.exists():
                     log_file.write(f"Missing input file for cutlist {cutlist_path.name}: {input_file}\n")
                     continue
@@ -249,11 +270,24 @@ class FFmpegCutterApp:
                 time_offset_start = self.start_offset_var.get() / framerate
                 time_offset_end = self.end_offset_var.get() / framerate
 
-                output_dir = source_dir / input_file.stem # Output directory is now a subfolder of source_dir
+                output_dir = source_dir / input_file.stem
                 output_dir.mkdir(parents=True, exist_ok=True)
 
-                ext = input_file.suffix if self.container_mode_var.get() == "Same as source" else f".{self.container_mode_var.get().lower()}"
-                audio_flag = "-c:a copy" if self.audio_mode_var.get() == "Copy" else f"-c:a {self.audio_mode_var.get().lower()} -b:a {self.audio_bitrate_var.get()}k"
+                # Determine output extension
+                output_container = self.container_mode_var.get()
+                if output_container == "Same as source":
+                    ext = input_file.suffix
+                else:
+                    ext = f".{output_container.lower()}"
+
+                # Determine audio flag based on selected mode
+                audio_mode = self.audio_mode_var.get().lower()
+                if audio_mode == "copy":
+                    audio_flag = "-c:a copy"
+                elif audio_mode == "wav":
+                    audio_flag = "-c:a pcm_s16le" # Standard uncompressed PCM for WAV
+                else: # AAC or MP3
+                    audio_flag = f"-c:a {audio_mode} -b:a {self.audio_bitrate_var.get()}k"
 
                 for i, (start_time_orig, duration_orig) in enumerate(segments):
                     if self.stop_event.is_set():
@@ -276,7 +310,7 @@ class FFmpegCutterApp:
                     self.progress_var.set((processed_segments / total_segments) * 100)
 
                     elapsed = time.time() - start_time
-                    if processed_segments > 0: # Avoid division by zero
+                    if processed_segments > 0:
                         rate = elapsed / processed_segments
                         remaining = (total_segments - processed_segments) * rate
                         self.time_remaining_var.set(f"Estimated time remaining: {int(remaining)} sec")
@@ -310,6 +344,13 @@ How It Works:
   (e.g. /selected_folder/myvideo/) within the *selected folder*.
 - All FFmpeg output is saved to a single timestamped log file in the *selected folder*.
 
+Audio Modes:
+- Copy: Losslessly copies the audio stream. No re-encoding. Bitrate not applicable.
+- AAC / MP3: Re-encodes audio to the selected lossy format at a specified bitrate.
+- WAV: Re-encodes audio to uncompressed WAV (PCM). Bitrate not applicable.
+  *Note: When WAV audio is selected, the output container will automatically be set to MKV,
+  as WAV is most reliably supported in the MKV container.*
+
 Configuration:
 The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
@@ -319,9 +360,6 @@ Other default values can still be changed by editing this file. Look for:
     self.audio_mode_var = tk.StringVar(value='Copy')
     self.audio_bitrate_var = tk.StringVar(value='128')
     self.container_mode_var = tk.StringVar(value='Same as source')
-
-Tip:
-Use Copy mode to preserve audio. Only adjust bitrate if you’re re-encoding.
 
 Enjoy frame-accurate cutting!"""
         messagebox.showinfo("Help - FFmpeg Cutter", help_text)
