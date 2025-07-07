@@ -82,7 +82,7 @@ def main():
         # from "my.movie.mkv_adjusted.vdscript"
         base_video_name = vdscript_path.name.replace(adjusted_vdscript_suffix, "")
         
-        # Construct the expected frame log path (updated naming convention)
+        # Construct the expected frame log path (new naming convention)
         showinfo_log_path = script_dir / f"{base_video_name}_frame_log.txt"
         output_cutlist_path = script_dir / f"{base_video_name}.cutlist.txt"
 
@@ -141,6 +141,7 @@ def main():
         if timecode_segments:
             try:
                 with open(output_cutlist_path, 'w') as f:
+                    f.write(f"# fps={input_fps:.6f}\n")  # Write FPS at top of file
                     for line in timecode_segments:
                         f.write(line + "\n")
                 print(f"Successfully generated timecode cutlist: '{output_cutlist_path.name}'")
