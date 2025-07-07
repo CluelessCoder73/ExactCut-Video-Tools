@@ -344,6 +344,15 @@ How It Works:
   (e.g. /selected_folder/myvideo/) within the *selected folder*.
 - All FFmpeg output is saved to a single timestamped log file in the *selected folder*.
 
+Cutlist Format:
+Cutlist files (*.cutlist.txt) are plain text files with the following structure:
+- The first line must specify the video's FPS, e.g.:
+  # fps=23.976000
+- Subsequent lines define segments, each with a start time and duration in seconds:
+  start_time=0.021000,duration=10.010010
+  start_time=821.759000,duration=11.594928
+  ...and so on.
+
 Audio Modes:
 - Copy: Losslessly copies the audio stream. No re-encoding. Bitrate not applicable.
 - AAC / MP3: Re-encodes audio to the selected lossy format at a specified bitrate.
