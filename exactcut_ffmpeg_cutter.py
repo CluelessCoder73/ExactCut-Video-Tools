@@ -1,104 +1,52 @@
 import os
 import re
 from pathlib import Path
+import tkinter as tk
+from tkinter import ttk, messagebox
 
 def parse_timecode_cutlist(cutlist_path):
-    """Parses a timecode cutlist file and returns a list of (start_time, duration) tuples."""
     segments = []
-    # Regex to find lines like 'start_time=X.Y,duration=A.B'
     segment_pattern = re.compile(r'start_time=([\d.]+),duration=([\d.]+)')
-
-    try:
-        with open(cutlist_path, 'r') as f:
-            for line in f:
-                match = segment_pattern.search(line)
-                if match:
-                    start_time = float(match.group(1))
-                    duration = float(match.group(2))
-                    segments.append((start_time, duration))
-    except FileNotFoundError:
-        print(f"Error: Cutlist file not found at '{cutlist_path}'. Please ensure the path is correct.")
-    except Exception as e:
-        print(f"Error parsing cutlist '{cutlist_path}': {e}")
+    with open(cutlist_path, 'r') as f:
+        for line in f:
+            match = segment_pattern.search(line)
+            if match:
+                start_time = float(match.group(1))
+                duration = float(match.group(2))
+                segments.append((start_time, duration))
     return segments
 
-def main():
-    print("--- ExactCut Video Tools: Timecode Cutlist to FFmpeg Cutter ---")
-    print("This script reads timecode cutlist files and generates FFmpeg commands.")
-    print("It produces separate output files for each segment, organized into subfolders.")
-    print("-----------------------------------------------------------------")
-
-    script_dir = Path(__file__).parent 
-    print(f"Script is running from: '{script_dir}'")
-    
-    # --- 0. Get user inputs for offsets and frame rate ---
-    while True:
-        try:
-            framerate_str = input("Enter the EXACT frame rate (e.g., 23.976, 25, 29.97, 60) for your video(s) to calculate frame offsets: ")
-            framerate = float(framerate_str)
-            if framerate <= 0:
-                raise ValueError
-            break
-        except ValueError:
-            print("Invalid frame rate. Please enter a positive number (e.g., 23.976).")
-
-    while True:
-        try:
-            start_frame_offset_str = input("Enter the number of frames to shift the START of each segment forward by (e.g., 0, 5, 10): ")
-            start_frame_offset = int(start_frame_offset_str)
-            if start_frame_offset < 0:
-                raise ValueError
-            break
-        except ValueError:
-            print("Invalid input. Please enter a non-negative integer for the start frame offset.")
-
-    while True:
-        try:
-            end_frame_offset_str = input("Enter the number of frames to shift the END of each segment forward by (e.g., 0, 5, 10): ")
-            end_frame_offset = int(end_frame_offset_str)
-            if end_frame_offset < 0:
-                raise ValueError
-            break
-        except ValueError:
-            print("Invalid input. Please enter a non-negative integer for the end frame offset.")
-            
-    time_offset_start = start_frame_offset / framerate
-    time_offset_end = end_frame_offset / framerate
-    print(f"Calculated start time offset: {time_offset_start:.4f}s, end time offset: {time_offset_end:.4f}s")
-
-    # --- 1. Find .cutlist.txt files ---
+def generate_ffmpeg_batch(start_frame_offset, end_frame_offset, audio_mode, audio_bitrate, container_choice):
+    script_dir = Path(__file__).parent
     cutlist_suffix = ".cutlist.txt"
-    all_files_in_dir = [f for f in script_dir.iterdir() if f.is_file()]
-    cutlist_files = []
-
-    print(f"Scanning '{script_dir}' for timecode cutlist files ending with '{cutlist_suffix}'...")
-    for f_path in all_files_in_dir:
-        if str(f_path.name).endswith(cutlist_suffix):
-            cutlist_files.append(f_path)
+    cutlist_files = [f for f in script_dir.iterdir() if f.is_file() and f.name.endswith(cutlist_suffix)]
 
     if not cutlist_files:
-        print(f"No cutlist files found ending with '{cutlist_suffix}' in '{script_dir}'.")
-        print("Please ensure you've run 'vdscript_to_timecode_cutlist_generator.py' first.")
+        messagebox.showwarning("No Cutlists Found", f"No files ending in {cutlist_suffix} were found.")
         return
 
-    print(f"Found {len(cutlist_files)} '{cutlist_suffix}' file(s).")
-    
     all_ffmpeg_commands = []
     output_info_messages = []
 
-    # --- 2. Process each cutlist file ---
     for cutlist_path in cutlist_files:
-        print(f"\nProcessing '{cutlist_path.name}'...")
-        
-        # Derive original video filename (e.g., "my.movie.mkv")
-        # from "my.movie.mkv.cutlist.txt"
-        original_video_full_name = cutlist_path.name.replace(cutlist_suffix, "")
-        input_video_file = script_dir / original_video_full_name
+        try:
+            with open(cutlist_path, 'r') as f:
+                first_line = f.readline()
+                fps_match = re.match(r"#\s*fps\s*=\s*([\d.]+)", first_line)
+                if not fps_match:
+                    raise ValueError
+                framerate = float(fps_match.group(1))
+        except Exception:
+            print(f"Could not read FPS from '{cutlist_path.name}'. Skipping.")
+            continue
 
-        # Verify the corresponding video file exists
-        if not input_video_file.is_file():
-            print(f"Warning: Corresponding video file '{input_video_file.name}' not found for '{cutlist_path.name}'. Skipping this cutlist.")
-            print(f"  (Expected path: '{input_video_file}')")
+        time_offset_start = start_frame_offset / framerate
+        time_offset_end = end_frame_offset / framerate
+
+        original_video_name = cutlist_path.name.replace(cutlist_suffix, "")
+        input_video_file = script_dir / original_video_name
+        if not input_video_file.exists():
+            print(f"Video file '{original_video_name}' not found. Skipping.")
             continue
 
         segments = parse_timecode_cutlist(cutlist_path)
@@ -106,69 +54,90 @@ def main():
             print(f"No valid segments found in '{cutlist_path.name}'. Skipping.")
             continue
 
-        # Create output subfolder for this video
-        output_folder_name = input_video_file.stem 
-        output_subfolder = script_dir / output_folder_name
-        output_subfolder.mkdir(parents=True, exist_ok=True) # Create if it doesn't exist
+        output_folder = script_dir / input_video_file.stem
+        output_folder.mkdir(exist_ok=True)
 
-        # Generate FFmpeg commands for this video's segments
-        for i, (original_start_time, original_duration) in enumerate(segments):
-            
-            # Apply offsets
-            adjusted_start_time = original_start_time + time_offset_start
-            old_end_time = original_start_time + original_duration
-            adjusted_end_time = old_end_time + time_offset_end
-            adjusted_duration = adjusted_end_time - adjusted_start_time
-
-            # Ensure duration is not negative (though unlikely with forward shifts)
-            if adjusted_duration < 0:
-                print(f"Warning: Calculated negative duration for segment {i+1}. Skipping.")
+        for idx, (start_time, duration) in enumerate(segments):
+            adjusted_start = start_time + time_offset_start
+            adjusted_end = start_time + duration + time_offset_end
+            adjusted_duration = adjusted_end - adjusted_start
+            if adjusted_duration <= 0:
                 continue
 
-            output_segment_filename = f"{input_video_file.stem}_part_{i+1:03d}{input_video_file.suffix}"
-            output_segment_path = output_subfolder / output_segment_filename
-            
-            # Reverting FFmpeg command to playable version: -ss before -i, keep -avoid_negative_ts make_zero
-            command = (
-                f'ffmpeg -ss {adjusted_start_time:.6f} -i "{input_video_file}" '
-                f'-t {adjusted_duration:.6f} -c copy -avoid_negative_ts make_zero '
-                f'"{output_segment_path}" || true' 
+            ext = input_video_file.suffix if container_choice == "Same as source" else f".{container_choice.lower()}"
+            output_filename = f"{input_video_file.stem}_part_{idx+1:03d}{ext}"
+            output_path = output_folder / output_filename
+
+            audio_params = "-c:a copy" if audio_mode == "Copy" else f"-c:a {audio_mode} -b:a {audio_bitrate}k"
+            cmd = (
+                f'ffmpeg -ss {adjusted_start:.6f} -i "{input_video_file}" '
+                f'-t {adjusted_duration:.6f} -c:v copy {audio_params} -avoid_negative_ts make_zero '
+                f'"{output_path}" || true'
             )
-            all_ffmpeg_commands.append(command)
-            output_info_messages.append(f"  - Generated command for '{input_video_file.name}': segment {i+1} (start {adjusted_start_time:.3f}s, duration {adjusted_duration:.3f}s) -> saved to '{output_segment_path.relative_to(script_dir)}'")
 
-    # --- 3. Write all commands to a single .bat file ---
-    if not all_ffmpeg_commands:
-        print("No FFmpeg commands were generated for any video. Nothing to do.")
-        return
+            all_ffmpeg_commands.append(cmd)
+            output_info_messages.append(
+                f"  - {output_filename}: start {adjusted_start:.3f}s, duration {adjusted_duration:.3f}s"
+            )
 
-    output_batch_file = script_dir / "run_ffmpeg_cuts.bat"
-    try:
-        with open(output_batch_file, 'w') as f:
+    if all_ffmpeg_commands:
+        batch_file = script_dir / "run_ffmpeg_cuts.bat"
+        with open(batch_file, 'w') as f:
             f.write("@echo off\n")
-            f.write("rem FFmpeg cutting commands generated by ExactCut Video Tools\n")
-            f.write("rem These commands perform lossless stream copies (-c copy).\n")
-            f.write("rem Ensure ffmpeg.exe is in your system PATH or specify its full path (e.g., 'C:\\ffmpeg\\bin\\ffmpeg.exe').\n")
-            f.write("rem Note: '|| true' is used to allow the batch file to continue if FFmpeg reports non-fatal errors during stream copy.\n")
-            f.write("rem Note: '-ss' is placed BEFORE '-i' for maximum playability, and '-avoid_negative_ts make_zero' is used for timestamp robustness.\n")
-            f.write("rem Note: Start and End frame offsets were applied based on user input.\n\n") 
-            f.write("echo Starting FFmpeg cut operations...\n\n")
-            
+            f.write("echo Starting FFmpeg cuts...\n\n")
             for msg in output_info_messages:
                 f.write(f"echo {msg}\n")
             f.write("\n")
-
             for cmd in all_ffmpeg_commands:
-                f.write(cmd + "\n")
-                f.write("\n") 
+                f.write(cmd + "\n\n")
+            f.write("echo All cuts completed.\npause\n")
 
-            f.write("\necho All FFmpeg cutting operations completed successfully.\n")
-            f.write("pause\n")
-        print(f"\nSuccessfully generated FFmpeg cutting commands to: '{output_batch_file}'")
-        print("To perform the cuts, simply run this batch file from Command Prompt.")
-        print("Each cut segment will be placed in a subfolder named after the original video (e.g., 'my.movie/').")
-    except Exception as e:
-        print(f"Error writing batch file: {e}")
+        messagebox.showinfo("Success", f"Batch file saved:\n{batch_file.name}")
+    else:
+        messagebox.showwarning("No Commands Generated", "No FFmpeg commands were generated.")
+
+def launch_gui():
+    root = tk.Tk()
+    root.title("FFmpeg Cutlist Generator")
+
+    tk.Label(root, text="Start Frame Offset:").pack()
+    entry_start = tk.Entry(root)
+    entry_start.insert(0, "1")
+    entry_start.pack()
+
+    tk.Label(root, text="End Frame Offset:").pack()
+    entry_end = tk.Entry(root)
+    entry_end.insert(0, "0")
+    entry_end.pack()
+
+    tk.Label(root, text="Audio Mode:").pack()
+    audio_mode = tk.StringVar(value="Copy")
+    audio_menu = ttk.Combobox(root, textvariable=audio_mode, values=["Copy", "aac", "mp3"], state="readonly")
+    audio_menu.pack()
+
+    tk.Label(root, text="Audio Bitrate (kbps):").pack()
+    bitrate = tk.StringVar(value="128")
+    bitrate_menu = ttk.Combobox(root, textvariable=bitrate, values=["128", "160", "192"], state="readonly")
+    bitrate_menu.pack()
+
+    tk.Label(root, text="Output Container:").pack()
+    container = tk.StringVar(value="Same as source")
+    container_menu = ttk.Combobox(root, textvariable=container, values=["Same as source", "mp4", "mkv", "mov"], state="readonly")
+    container_menu.pack()
+
+    def on_generate():
+        try:
+            start_offset = int(entry_start.get())
+            end_offset = int(entry_end.get())
+            audio = audio_mode.get()
+            br = bitrate.get()
+            fmt = container.get()
+            generate_ffmpeg_batch(start_offset, end_offset, audio, br, fmt)
+        except Exception as e:
+            messagebox.showerror("Error", str(e))
+
+    tk.Button(root, text="Generate FFmpeg Cutlist", command=on_generate).pack(pady=10)
+    root.mainloop()
 
 if __name__ == "__main__":
-    main()
+    launch_gui()
