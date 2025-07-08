@@ -155,7 +155,7 @@ def main():
         print("\nNo timecode cutlist files were generated. Please check warnings above.")
     else:
         print(f"\nFinished generating {generated_cutlists_count} timecode cutlist file(s).")
-        print("Next, you'll use the FFmpeg cutter script to use these new cutlist files.")
+        print("Next, you'll use ExactCut FFmpeg Cutter to use these new cutlist files.")
 
 if __name__ == "__main__":
     main()
