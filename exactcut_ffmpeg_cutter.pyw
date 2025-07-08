@@ -9,6 +9,10 @@ from datetime import datetime
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+# Tested and works with:
+# - Python 3.13.2
+# - FFmpeg (the version in LosslessCut 3.64.0)
+
 # --- Settings ---
 CUTLIST_SUFFIX = ".cutlist.txt"
 LOG_FILENAME_TEMPLATE = "ffmpeg_log-{timestamp}.log"
