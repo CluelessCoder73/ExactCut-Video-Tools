@@ -1,7 +1,7 @@
 """
 User Guide for vdscript_range_adjuster.py
 Purpose
-This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to a "Cuttermaran" project file, or an "MKVToolNix GUI" cutlist via "vdscript_to_mkvtoolnix.py" (included). For Cuttermaran, "vdscript_to_cpf" is available at https://github.com/CluelessCoder73/vdscript_to_cpf
+This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to a Cuttermaran project file, an MKVToolNix GUI cutlist, or an *ExactCut FFmpeg Cutter cutlist via *vdscript_to_timecode_cutlist_generator.py (*included). More info at the bottom of this guide.
 This script now works in batch mode!
 # Tested and works with:
 # - Python 3.13.2
@@ -15,8 +15,8 @@ Features:
     Alternatively, you can also adjust the start point to the "2nd" previous I-frame (the I-frame before the previous one). In that case, if the start point is already on an I-frame, it is instead adjusted to just the previous I-frame. Can be useful when working with x265 & other "open GOP" codecs, where cut-in points end up corrupted, & the video doesn't play right again until the next I-frame.
     In fact, you can go furter back in I-frames, but I don't see any need (so far) to go any further back than 2.
 
-	# - Adjusts endpoints to the last P-frame before the next I-frame. If the endpoint is already on the last P-frame before the next I-frame, it is left untouched.
-    Alternatively, you can adjust the endpoints to just the next P or I-frame ("short_cut_mode = True"). In that case, if, e.g., the endpoint is already on a P or I-frame, it is left untouched.
+	# - Adjusts endpoints to the next P or I-frame. If the endpoint is already on a P or I-frame, it is left untouched.
+    Alternatively, you can also adjust the endpoint to the last P-frame before the next I-frame ("short_cut_mode = False"). In that case, if, e.g., the endpoint is already on the last P-frame before the next I-frame, it is left untouched.
     
 # - Merges overlapping or close ranges (optional)
 
@@ -33,7 +33,7 @@ directory = '.'
 i_frame_offset = 1
 merge_ranges_option = True
 min_gap_between_ranges = 100
-short_cut_mode = False
+short_cut_mode = True
 
 Adjust these parameters as needed:
 
@@ -44,13 +44,12 @@ Adjust these parameters as needed:
     short_cut_mode: Set to True to enable moving endpoints to the next P or I-frame, False for "full GOP mode"
 
 Output
-The script generates new .vdscript files with the adjusted cut points. These files can then be used directly in VirtualDub or VirtualDub2 (depending on which version created the original vdscript files!), or converted to other formats like .cpf (Cuttermaran project files) or "MKVToolNix GUI" cutlists.
+The script generates new .vdscript files with the adjusted cut points. These files can then be used directly in VirtualDub or VirtualDub2 (depending on which version created the original vdscript files!), or converted to other formats like .cpf (Cuttermaran project files), "MKVToolNix GUI" cutlists or "ExactCut FFmpeg Cutter" cutlists.
 Tips for Optimal Use
 
     When editing proxy videos, place cut points freely without worrying about exact frame types.
     Use this script to adjust the cut points before applying them to your high-resolution footage.
     Experiment with the i_frame_offset value to find the best balance between accuracy and avoiding potential corruption from open GOP structures.
-    If you notice any issues with playback at cut points, try increasing the i_frame_offset value.
 
 Troubleshooting
 
@@ -61,9 +60,9 @@ Troubleshooting
 Converting Output to Other Formats
 After generating the adjusted .vdscript file, you can convert it to other formats:
 
-    For Cuttermaran: Use "vdscript_to_cpf" to create a .cpf file.
-    For LosslessCut: Use "vdscript_to_llc". WARNING: not frame-accurate!
-    For MKVToolNix GUI: Use "vdscript_to_mkvtoolnix.py" (included).
+    For Cuttermaran: Use "vdscript_to_cpf".
+    For MKVToolNix GUI: Use "vdscript_to_mkvtoolnix".
+    For ExactCut FFmpeg Cutter: Use `vdscript_to_timecode_cutlist_generator.py` (both included).
     All are available at https://github.com/CluelessCoder73?tab=repositories
 
 This script provides a powerful solution for ensuring accurate, lossless cuts in your video editing workflow, especially when working with proxy videos for high-resolution content. By automating the adjustment of cut points to legal frame boundaries, it saves time and guarantees the integrity of your final edit.
