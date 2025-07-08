@@ -7,7 +7,7 @@ This script now works in batch mode!
 # - Python 3.13.2
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
-# - "FFmpeg" generated frame log files (the version in LosslessCut 3.65.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 
 Features:
 
@@ -189,7 +189,7 @@ directory = '.'  # Current directory, change if needed
 i_frame_offset = 1  # Increase this value to go further back in I-frames
 merge_ranges_option = True  # Set to False to disable merging
 min_gap_between_ranges = 100  # Minimum gap between ranges (in frames)
-short_cut_mode = False  # Set to False for "full GOP mode"
+short_cut_mode = True  # Set to False for "full GOP mode"
 
 batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
 
