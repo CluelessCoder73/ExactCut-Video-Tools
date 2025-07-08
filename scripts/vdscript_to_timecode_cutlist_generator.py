@@ -1,5 +1,11 @@
 import os
 import re
+
+# Tested and works with:
+# - Python 3.13.2
+# - VirtualDub2 (build 44282) .vdscript files
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
+
 from pathlib import Path
 
 def parse_showinfo_log(log_path):

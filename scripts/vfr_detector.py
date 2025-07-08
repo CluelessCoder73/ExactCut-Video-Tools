@@ -1,6 +1,9 @@
 # vfr_detector.py
 # Standalone script to detect VFR in all *_frame_log.txt files in the current directory
 # Now also flags "suspiciously small differences" (e.g., minor rounding errors)
+# Tested and works with:
+# - Python 3.13.2
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 """
 # 🎥 `vfr_detector.py` — User Guide
 
