@@ -1,29 +1,29 @@
 import os
 import re
+import sys # Import sys module
 
 # ----------------------------------------------------------------------
 # Script: vdscript_info.py
 # Description:
-# This script converts VirtualDub or VirtualDub2 .vdscript files into a 
-# simple text file containing all the timecodes for the wanted parts, 
-# followed by the frame numbers (start - end), followed by the length 
-# in time, then frames. On the 3rd last line, we have "Total Length" in 
-# time, then frames, & on the 2nd last line, we have fps. This can be 
+# This script converts VirtualDub or VirtualDub2 .vdscript files into a
+# simple text file containing all the timecodes for the wanted parts,
+# followed by the frame numbers (start - end), followed by the length
+# in time, then frames. On the 3rd last line, we have "Total Length" in
+# time, then frames, & on the 2nd last line, we have fps. This can be
 # useful if you forget whether you input the correct frame rate or not.
 # NOW WORKS IN BATCH MODE!!!
 # This script was tested and works with:
 # - Python 3.13.2
-# - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
 #
 # Usage:
 # 1. Place this script in a folder containing 1 or more vdscript files.
-#    WARNING: They must ALL have the same frame rate! Create separate 
-#    folders if they don't (e.g., "23.976", "25"), & copy this script 
+#    WARNING: They must ALL have the same frame rate! Create separate
+#    folders if they don't (e.g., "23.976", "25"), & copy this script
 #    to each one.
 # 2. Run the script.
 # 3. Enter the correct frame rate when asked.
-# 4. A text file will be created for each vdscript, with the same name, 
+# 4. A text file will be created for each vdscript, with the same name,
 #    but with "_info.txt" appended.
 #
 # Example:
@@ -56,14 +56,14 @@ def process_vdscript(file_path, fps):
 timecodes with frame counts. Save the output as a corresponding _info.txt file.
     """
     output_file = file_path.replace(".vdscript", "_info.txt")
-    
+
     with open(file_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
-    
+
     selections = []
     total_frames = 0
     pattern = re.compile(r"VirtualDub\.subset\.AddRange\((\d+),(\d+)\);")
-    
+
     for line in lines:
         match = pattern.search(line)
         if match:
@@ -72,10 +72,10 @@ timecodes with frame counts. Save the output as a corresponding _info.txt file.
             end_frame = start_frame + length - 1  # Convert to endpoint-inclusive
             selections.append((start_frame, end_frame, length))
             total_frames += length
-    
+
     # Determine the max width for frame range text for alignment
     max_frames_text_length = max(len(f"(Frames {s[0]} - {s[1]})") for s in selections)
-    
+
     with open(output_file, 'w', encoding='utf-8') as f:
         for start, end, length in selections:
             start_tc = timecode(start, fps)
@@ -83,7 +83,7 @@ timecodes with frame counts. Save the output as a corresponding _info.txt file.
             length_tc = timecode(length, fps)
             frames_text = f"(Frames {start} - {end})"
             f.write(f"{start_tc} - {end_tc} {frames_text:<{max_frames_text_length}}   Length: {length_tc} ({length} frames)\n")
-        
+
         # Add total length information
         f.write("-" * 80 + "\n")
         total_length_tc = timecode(total_frames, fps)
@@ -97,19 +97,29 @@ def main():
     """
     folder = os.getcwd()
     vdscript_files = [f for f in os.listdir(folder) if f.endswith(".vdscript")]
-    
+
     if not vdscript_files:
         print("No .vdscript files found in the folder.")
         return
-    
-    # Ask the user for the frame rate (FPS)
-    fps = float(input("Enter the frame rate (fps): "))
-    input("WARNING: Are you sure that all frame rates match? (Press Enter to continue, or Ctrl+C to cancel)")
-    
+
+    # Check if input is being piped
+    if not sys.stdin.isatty():
+        # If input is piped, read FPS from stdin
+        try:
+            fps = float(sys.stdin.readline().strip())
+        except ValueError:
+            print("Error: Invalid frame rate provided via pipe. Please provide a float value.")
+            return
+        # Skip the warning prompt when piping input
+    else:
+        # If not piped (interactive mode), ask the user for the frame rate (FPS)
+        fps = float(input("Enter the frame rate (fps): "))
+        input("WARNING: Are you sure that all frame rates match? (Press Enter to continue, or Ctrl+C to cancel)")
+
     for file in vdscript_files:
         print(f"Processing {file}...")
         process_vdscript(os.path.join(folder, file), fps)
-    
+
     print("Batch processing complete! Output files have '_info.txt' suffix.")
 
 if __name__ == "__main__":
