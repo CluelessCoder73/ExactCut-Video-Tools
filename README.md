@@ -55,7 +55,9 @@ Before you begin, ensure you have the following installed:
 * **HandBrake:** For proxy video creation.
 
 Works with *constant* frame rate only! iPhones and Android devices often utilize variable frame rates (VFR) for video recording. Unfortunately, those videos are NOT compatible with this workflow!
+
 FFmpeg must be in your system's path! This is explained in "\ExactCut-Video-Tools\docs\FFMPEG_NOOB_GUIDE.md".
+
 Not *every* video format is supported! But so far, i've had no problems cutting MP4/MKV with VP9/x264/x265 video codecs (for x265, set "i_frame_offset" to "2" in `vdscript_range_adjuster.py`).
 
 ---
