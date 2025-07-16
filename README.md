@@ -94,7 +94,7 @@ Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not
 * Each generated frame log file will have the same name as its corresponding video (including extension), with `_frame_log.txt` appended (e.g., `my_video.mp4_frame_log.txt`). These logs contain the essential frame type (I, P, B) and frame number information required for precise adjustments.
 
 **Step 6: Edit Your Proxy Videos in VirtualDub2**
-* Open a proxy video (or original MP4 if you skipped proxy creation) with VirtualDub2. You can use either the 32-bit or 64-bit version; the output vdscript is identical. (For performance, the 64-bit version is generally recommended).
+* Open a proxy video (or the original MKV/MP4 if you skipped proxy creation) with VirtualDub2. You can use either the 32-bit or 64-bit version; the output vdscript is identical. (For performance, the 64-bit version is generally recommended).
 * **Efficient Editing Tips:**
     * Scan at high speed using `SHIFT + LEFT` and `SHIFT + RIGHT`.
     * Go even faster by using `ALT + LEFT` and `PGDN`.
