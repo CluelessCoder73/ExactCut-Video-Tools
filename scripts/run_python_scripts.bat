@@ -22,9 +22,11 @@ echo Running gop_analyzer.py...
 python gop_analyzer.py
 echo.
 
-REM --- 5. Run vfr_detector.py ---
-echo Running vfr_detector.py...
-python vfr_detector.py
+REM --- 5. Run exactcut_vfr_detector.pyw (now in batch mode) ---
+echo Running exactcut_vfr_detector.pyw in batch mode...
+REM The --path argument tells the script where to find the _frame_log.txt files.
+REM %CD% expands to the current directory where the batch file is run.
+python exactcut_vfr_detector.pyw --batch-mode --path "%CD%"
 echo.
 
 REM --- 6. Run vdscript_to_timecode_cutlist_generator.py ---
