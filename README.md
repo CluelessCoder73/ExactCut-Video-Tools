@@ -70,7 +70,7 @@ ExactCut Video Tools streamlines your workflow into 9 steps:
 Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not, remux them to one of those formats. LosslessCut can do this (Export options > Output container format:). This step is crucial for consistent frame indexing across the workflow.
 
 **Step 2: Organize Source Videos**
-* Put all your source videos into separate folders according to their frame rates (e.g., `23.976`, `25`, etc.). This helps `vdscript_info.py` & `vdscript_to_timecode_cutlist_generator.py` to process them correctly.
+* Put all your source videos into separate folders according to their frame rates (e.g., `23.976`, `25`, etc.). This helps `vdscript_info.py` & `vdscript_to_timecode_cutlist_generator.py` to process them correctly. I recommend getting the frame rate from LosslessCut (advanced view), or HandBrake. DO NOT use MediaInfo for this task (it sometimes reports e.g., 59.94 fps as 60 fps).
 
 **Step 3: Create Proxy Videos (Optional)**
 * Create lower-resolution proxy versions of your videos using HandBrake. Use one of the custom presets provided with ExactCut Video Tools.
@@ -106,21 +106,21 @@ Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not
 **Step 7: Run `run_python_scripts.bat`**
 * This batch file performs the following operations:
 
-* Run `vdscript_range_adjuster.py`
+* Runs `vdscript_range_adjuster.py`
 * The script will automatically process every vdscript file in the directory (provided it has a corresponding frame log file).
 * The outputted files will have `_adjusted.vdscript` appended (e.g., `whatever.mp4_adjusted.vdscript`). These adjusted scripts now contain the precise frame ranges aligned to legal frame boundaries.
 
-* Run `vdscript_info.py`
+* Runs `vdscript_info.py`
 * This tool provides you with a detailed "before & after" comparison of your cut ranges.
 * It processes all vdscript files in the containing folder, & the output files will have '_info.txt' suffix. Then, just use Notepad++ or a diff checking app to inspect the differences between your original + "adjusted" vdscript files.
 
-* Run `gop_analyzer.py`
+* Runs `gop_analyzer.py`
 * Creates a file called `gop_info.txt`. If the smallest starting GOP in all vdscripts is "2" or more, you're good to go. If not, you may lose frames (unless you set "Start Frame Offset" to "0" in ExactCut FFmpeg Cutter). Read the instructions in the script for more info (only for perfectionists).
 
-* Run `vfr_detector.py`
+* Runs `exactcut_vfr_detector.pyw`
 * Creates a file called `VFR_info.txt`. It informs you about "variable frame rate" in any of your source videos. If any of your videos *are* VFR, they are *not* suitable for this workflow!
 
-* Run `vdscript_to_timecode_cutlist_generator.py`
+* Runs `vdscript_to_timecode_cutlist_generator.py`
 * Creates the cutlists necessary for ExactCut FFmpeg Cutter to do its job.
 
 **Step 8: ExactCut FFmpeg Cutter**
