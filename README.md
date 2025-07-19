@@ -142,7 +142,7 @@ To verify a match:
 3.  Now, open your proxy video in VirtualDub2, and hit the `[End]` key. This will bring you to the last frame of the video.
 4.  The display at the bottom of VirtualDub2 should say, e.g., `Frame 58358`. This is the total number of frames in your proxy video.
 5.  This total frame count in VirtualDub2 SHOULD be `+1` compared to that last frame index reported in the frame log (`n:58357` vs `Frame 58358`), because in VirtualDub2, the last displayed frame is always an "empty" frame.
-6.  **DO NOT** directly compare the proxy video's frame count with the actual source video file's frame count itself (e.g., using `mkvinfo` or `ffprobe`). The frame counts might often match, but NOT ALWAYS! The critical thing (in terms of frame accuracy for this workflow) is that your FFmpeg-generated frame logs and your proxy videos (as displayed in VirtualDub2) match perfectly.
+6.  **DO NOT** directly compare the proxy video's frame count with the actual source video file's frame count itself (e.g., using `MediaInfo`). The frame counts might often match, but NOT ALWAYS! The critical thing (in terms of frame accuracy for this workflow) is that your FFmpeg-generated frame logs and your proxy videos (as displayed in VirtualDub2) match perfectly.
 
 ---
 
