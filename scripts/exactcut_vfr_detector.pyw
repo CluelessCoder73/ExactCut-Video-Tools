@@ -1,3 +1,93 @@
+"""
+ExactCut VFR Detector (exactcut_vfr_detector.pyw)
+
+This script scans FFmpeg *_frame_log.txt files for Variable Frame Rate (VFR), using forgiving parameters to reduce false positives.
+# Tested and works with:
+# - Python 3.13.2
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
+
+**Purpose:**
+This script scans all `*_frame_log.txt` files in the chosen directory to detect whether any videos were encoded using **Variable Frame Rate (VFR)**. It also flags files with **suspiciously small frame duration differences**, which are often falsely reported as VFR by tools like MediaInfo.
+
+The script operates in two modes:
+1. GUI Mode (Interactive)
+
+Interactive GUI for VFR detection.
+How to Run:
+
+    Double-click exactcut_vfr_detector.pyw.
+
+GUI Elements:
+
+    Detection Parameters:
+
+        Ignore First N Frames: (Default: 50). Skips initial frames to avoid false VFR from zero-duration logs.
+
+        Ignore 0.0 Duration Frames: (Default: checked). Ignores frames with 0.0 duration_time.
+
+        Duration Tolerance (seconds): (Default: 0.00005). Treats durations as identical if their absolute difference is below this value, preventing false VFR from minor rounding errors. (0.00005s is robust for common FPS).
+
+    Select Folder:
+
+        Browse for Folder: Select directory containing *_frame_log.txt files.
+
+    Action Buttons:
+
+        Run VFR Detection: Scans files in selected folder; displays results.
+
+        Save Output to File: Saves output to a .txt file.
+
+    Output Text Area: Displays detection progress, status, and unique frame durations (filtered/grouped).
+
+2. Batch Mode (Command-Line)
+
+Automated mode for batch scripts; runs silently, saves report to file.
+How to Run:
+
+    Run from command prompt/batch file:
+
+    python exactcut_vfr_detector.pyw --batch-mode --path "C:\path\to\your\log\files"
+
+        --batch-mode: Non-GUI execution.
+
+        --path: Mandatory directory for log files.
+
+Optional Batch Mode Arguments:
+
+    Override defaults:
+
+        --ignore-initial-frames <number> (Default: 50)
+
+        --ignore-zero-duration <True/False> (Default: True)
+
+        --duration-tolerance <float> (Default: 0.00005)
+
+Batch Mode Behavior:
+
+    No GUI.
+
+    Defaults: Parameters default as above if not specified.
+
+    Output: Report automatically saves to VFR_info.txt in the --path directory. Minimal console output.
+
+Output Report (VFR_info.txt or GUI Output)
+
+Report details per *_frame_log.txt file:
+
+    File Name
+
+    Status: "VFR detected" or "CFR (or VFR ignored)" (based on forgiving settings/grouping).
+
+    Unique Durations Found: Distinct duration_time values after filtering/grouping. Single unique duration means CFR.
+
+    Summary: Final VFR flag indication.
+
+Prerequisites:
+
+    Python 3.x.
+
+    *_frame_log.txt files (from FFmpeg showinfo).
+"""
 import os
 import re
 import tkinter as tk
