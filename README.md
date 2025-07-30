@@ -67,7 +67,7 @@ Not *every* video format is supported! But so far, i've had no problems cutting 
 ExactCut Video Tools streamlines your workflow into 9 steps:
 
 **Step 1: Prepare Your Videos for Frame Accuracy**
-Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not, remux them to one of those formats. LosslessCut can do this (Export options > Output container format:). This step is crucial for consistent frame indexing across the workflow.
+* Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not, remux them to one of those formats. LosslessCut can do this (Export options > Output container format:). This step is crucial for consistent frame indexing across the workflow.
 
 **Step 2: Organize Source Videos**
 * Put all your source videos into separate folders according to their frame rates (e.g., `23.976`, `25`, etc.). This helps `vdscript_info.py` & `vdscript_to_timecode_cutlist_generator.py` to process them correctly. I recommend getting the frame rate from LosslessCut (advanced view), or HandBrake. DO NOT use MediaInfo for this task (it sometimes reports e.g., 59.94 fps as 60 fps).
