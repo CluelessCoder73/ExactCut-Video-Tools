@@ -64,7 +64,7 @@ Not *every* video format is supported! But so far, i've had no problems cutting 
 
 ## How to Use
 
-ExactCut Video Tools streamlines your workflow into 9 steps:
+ExactCut Video Tools streamlines your workflow into 10 steps:
 
 **Step 1: Prepare Your Videos for Frame Accuracy**
 * Make sure your videos are MKV or MP4 for optimal frame accuracy. If they are not, remux them to one of those formats. LosslessCut can do this (Export options > Output container format:). This step is crucial for consistent frame indexing across the workflow.
@@ -81,8 +81,7 @@ ExactCut Video Tools streamlines your workflow into 9 steps:
     * **Crucial:** DO NOT save proxy videos to the same folder as your input source files!
 
 **Step 4: Prepare the Core Scripts**
-* Go to the `scripts` folder, open `frame_log_extractor.bat` in a text editor and specify the full path to `ffmpeg.exe` within the script. Save and replace the original with this modified version.
-* Now, copy the contents of the `scripts` folder into your "source videos" folder. Then, copy `exactcut_ffmpeg_cutter.pyw` to any location you like, e.g., "C:\PortableApps\PythonScripts".
+* Go to the `scripts` folder, & copy its contents into your "source videos" folder. Then, copy `exactcut_ffmpeg_cutter.pyw` & `exactcut_cleanup_tool.pyw` to any location you like, e.g., "C:\PortableApps\PythonScripts".
 
 **Step 5: Generate Frame Logs**
 * Run `frame_log_extractor.bat`.
@@ -129,6 +128,13 @@ ExactCut Video Tools streamlines your workflow into 9 steps:
 
 **Step 9: Merge**
 * Open LosslessCut, go to Tools > Merge/concatenate files, browse for desired folder, select all the parts, then merge. Enable "Check compatibility" to check file compatibility before merging. Repeat this process until all the parts in each subfolder have been merged - & that's it - FINITO!
+
+**Step 10: Cleanup**
+* Start `exactcut_cleanup_tool.pyw`, & browse for your "source videos" folder. For practical use, there are three modes of cleaning:
+* Mode 1: No boxes checked (default) - removes all the files which are outputted from `run_python_scripts.bat`.
+* Mode 2: "Remove scripts" box checked - same as Mode 1, but removes the scripts also.
+* Mode 3: Both boxes checked - removes *everything* except the source videos. Use with caution! (ExactCut FFmpeg Cutter output is unaffected).
+* Note that nothing gets deleted *per se*, but gets moved to a subfolder called `delete`. That way, you can experiment with different settings by simply renaming the `delete` folder to e.g., `test1` etc.
 
 ---
 
