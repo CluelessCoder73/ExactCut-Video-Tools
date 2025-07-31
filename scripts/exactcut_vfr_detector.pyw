@@ -1,4 +1,4 @@
-"""
+r"""
 ExactCut VFR Detector (exactcut_vfr_detector.pyw)
 
 This script scans FFmpeg *_frame_log.txt files for Variable Frame Rate (VFR), using forgiving parameters to reduce false positives.
