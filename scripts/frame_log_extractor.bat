@@ -6,7 +6,7 @@ rem Set the folder containing the videos
 set "video_folder=%~dp0"
 
 rem Set the path to FFmpeg
-set "ffmpeg_path=C:\PortableApps\LosslessCut-win-x64\resources\ffmpeg.exe"
+rem set "ffmpeg_path=C:\PortableApps\LosslessCut-win-x64\resources\ffmpeg.exe"
 
 echo Processing videos in: %video_folder%
 
@@ -29,9 +29,9 @@ for %%F in ("%video_folder%\*.mp4" "%video_folder%\*.avi" "%video_folder%\*.mkv"
         echo Processing video: !input_video!
 
         rem Run FFmpeg command to extract frame information        
-        "!ffmpeg_path!" -i "!input_video!" -vf showinfo -f null - 2>&1 | findstr /i "n:" > "!output_log!"
+        ffmpeg -i "!input_video!" -vf showinfo -f null - 2>&1 | findstr /i "n:" > "!output_log!"
 
-        rem Check if FFmpeg command completed successfully        
+        rem Check if FFmpeg command completed successfully       
         if !ERRORLEVEL!==0 (
             echo Operation completed successfully for: %%~nxF
         ) else (
