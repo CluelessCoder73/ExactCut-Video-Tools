@@ -143,11 +143,11 @@ ExactCut Video Tools streamlines your workflow into 10 steps:
 **VERY IMPORTANT!** - Do NOT get your original videos & proxy videos mixed up! Always ensure your proxy video matches the frame count of its corresponding source video for accurate results.
 
 To verify a match:
-1.  Open your `whatevervideo_frame_log.txt` file (e.g., `my_video.mp4_frame_log.txt`).
+1.  Open your frame log file (e.g., `my_video.mp4_frame_log.txt`).
 2.  Go to the second-to-last line (the last line of actual frame data). Somewhere in this line, it will say, e.g., `n:58357`. This is the index of the last *actual* frame in your video stream.
 3.  Now, open your proxy video in VirtualDub2, and hit the `[End]` key. This will bring you to the last frame of the video.
 4.  The display at the bottom of VirtualDub2 should say, e.g., `Frame 58358`. This is the total number of frames in your proxy video.
-5.  This total frame count in VirtualDub2 SHOULD be `+1` compared to that last frame index reported in the frame log (`n:58357` vs `Frame 58358`), because in VirtualDub2, the last displayed frame is always an "empty" frame.
+5.  This total frame count in VirtualDub2 SHOULD be `+1` compared to that last frame index reported in the frame log (`n:58357` vs `Frame 58358`), because in VirtualDub2, the last displayed frame is always an "empty" frame!
 6.  **DO NOT** directly compare the proxy video's frame count with the actual source video file's frame count itself (e.g., using `MediaInfo`). The frame counts might often match, but NOT ALWAYS! The critical thing (in terms of frame accuracy for this workflow) is that your FFmpeg-generated frame logs and your proxy videos (as displayed in VirtualDub2) match perfectly.
 
 ---
