@@ -61,11 +61,12 @@ Smallest starting GOP in all vdscripts: 17 frames ("video2.mp4_adjusted.vdscript
 
 How to Use the Results
 
-    The "Smallest starting GOP" value is +1 greater than the maximum number of frames you can safely shift the start frame offset in ExactCut FFmpeg Cutter without risking the loss of the first GOP in any segment.
+    The "Smallest starting GOP" value is "+1" greater than the maximum number of frames you can safely shift the start frame offset in ExactCut FFmpeg Cutter without risking the loss of the first GOP in any segment.
     When adjusting your start frame offset in ExactCut FFmpeg Cutter, ensure that you don't enter this (or more than this) number of frames.
-    Detailed explaination: Provided you haven't changed the start frame offset default value ("1"), the "Smallest starting GOP" needs to be at least "2". It is very unlikely that it would ever be lower than that, but NOT impossible! If it IS lower ("1" is the lowest possible value), you can:
+    DETAILED EXPLAINATION: Provided you haven't changed the start frame offset default value ("1"), the "Smallest starting GOP" needs to be at least "2". It is very unlikely that it would ever be lower than that, but NOT impossible! If it IS lower ("1" is the lowest possible value), you can:
     1) Ignore it (it might only be one segment, & it would only be one lost frame at the start of that segment).
-    2) Change the start frame offset value to "0". This will guarantee that you don't lose ANY frames from the start of any segment, but your output video(s) will be significantly longer. That's why it would probably be best to move the offending video(s) to different folders & process them separately, because ExactCut FFmpeg Cutter processes ALL videos (which have corresponding cutlists) in the source folder!
+    2) Change the start frame offset value to "0" in ExactCut FFmpeg Cutter. This will guarantee that you don't lose ANY frames from the start of any segment, but your output video(s) will be significantly longer.
+    3) (The best method) - Open your output *.cutlist.txt file, find the offending segment (`gop_info.txt` lists all starting GOPs in chronological order), subtract 1 second from the start time, & add 1 second to the duration. Repeat this process for all the offending segments.
     This approach allows you to fine-tune your cuts for frame accuracy while maintaining the integrity of each segment's starting GOP.
 
 Tip for Optimal Use
