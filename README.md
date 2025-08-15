@@ -1,7 +1,7 @@
 # ExactCut Video Tools
 
 **Achieve truly lossless video cuts without losing a single frame!**
-
+YouTube video demonstration: https://www.youtube.com/watch?v=hnfdgPkV2K4&t=861s
 ---
 
 ## The Problem with "Lossless" Video Editing
