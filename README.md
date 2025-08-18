@@ -75,7 +75,8 @@ ExactCut Video Tools streamlines your workflow into 10 steps:
 
 **Step 2: Organize Source Videos**
 * Put all your source videos into separate folders according to their frame rates (e.g., `23.976`, `25`, etc.). This step is necessary because all videos are processed in accordance with a predefined frame rate. If all your videos are the same frame rate, you can skip this step altogether & proceed to Step 3.
-*Note that (with the exception of `vdscript_info.py`), this predefined frame rate is *only* for the durations in the output cutlist files. All start times are obtained directly from the frame logs. I recommend getting the frame rate from LosslessCut (advanced view). DO NOT use MediaInfo for this task (it sometimes reports e.g., 59.94 fps as 60 fps).
+* NOTE: With the exception of `vdscript_info.py`, this predefined frame rate is *only* for the durations in the output cutlist files. All start times are obtained directly from the frame logs.
+* I recommend getting the frame rate from LosslessCut (advanced view). DO NOT use MediaInfo for this task (it sometimes reports e.g., 59.94 fps as 60 fps).
 
 **Step 3: Create Proxy Videos (Optional)**
 * Create lower-resolution proxy versions of your videos using HandBrake. Use one of the custom presets provided with ExactCut Video Tools.
