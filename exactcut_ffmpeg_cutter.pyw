@@ -369,7 +369,7 @@ The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
 
     self.start_offset_var = tk.IntVar(value=1)
-    self.end_offset_var = tk.IntVar(value=0)
+    self.end_offset_var = tk.IntVar(value=5)
     self.audio_mode_var = tk.StringVar(value='Copy')
     self.audio_bitrate_var = tk.StringVar(value='128')
     self.container_mode_var = tk.StringVar(value='Same as source')
