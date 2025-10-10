@@ -13,7 +13,7 @@ YouTube video demonstration: https://www.youtube.com/watch?v=hnfdgPkV2K4&t=861s
 Have you ever tried to cut a video "losslessly" using popular tools like mkvmerge or stream-copying with FFmpeg, only to find that your cuts aren't exactly where you placed them? You might notice:
 
 * **Lost Frames at the Start:** Your video segment begins *after* your intended start point, skipping valuable frames.
-* **Inaccurate End Points:** While less common, the end point might also shift, slightly altering your desired duration.
+* **Incomplete End Points:** The end point might also shift back in time, or may stutter just before the next segment starts.
 * **Keyframe Limitations:** Traditional "lossless" methods are forced to cut only at **keyframes (I-frames)**. If your desired cut point falls between keyframes, the tool *must* jump to the next available keyframe to avoid corrupting the video stream. This is why you lose frames!
 * **Complex Proxy Workflows:** If you edit with proxy videos for performance, manually aligning cuts for your high-resolution source can be a nightmare.
 * **Open GOP Codec Challenges:** Modern codecs like x265 (HEVC) use "Open GOP" structures, which can lead to visual corruption at cut-in points if not handled perfectly, often requiring you to cut even further back.
@@ -39,7 +39,7 @@ With ExactCut Video Tools, the tedious and error-prone process of manual keyfram
 ## Key Features
 
 * **Zero Frame Loss:** Guarantees no frames are lost at the beginning or end of your cut segments.
-* **Frame-Accurate Cuts:** Precisely aligns cut points to the nearest "legal frame boundaries" (I-frames and specific P-frames) using FFmpeg frame logs.
+* **Non-Destructive Cuts:** Precisely aligns cut points to the nearest "legal frame boundaries" (I-frames and specific P-frames) using FFmpeg frame logs.
 * **Automated Adjustment:** Eliminates the need for manual keyframe hunting and adjustment.
 * **Proxy Editing Ready:** Define cuts on your lightweight proxy videos; the script translates and adjusts for your full-resolution source.
 * **Open GOP Codec Support:** Smart adjustments (e.g., opting for the "2nd previous I-frame") to prevent corruption (of the chosen parts) with x265 and similar codecs.
@@ -53,7 +53,7 @@ With ExactCut Video Tools, the tedious and error-prone process of manual keyfram
 
 Before you begin, ensure you have the following installed:
 
-* **Python:** Version 3.13.2 or newer (tested with this version, others may work).
+* **Python:** Version 3.13.7 or newer (tested with this version, others may work).
 * **LosslessCut: 3.64.0 or newer (for merging the parts & access to FFmpeg).
 * **VirtualDub2:** For creating your initial cutlists.
 * **HandBrake:** For proxy video creation.

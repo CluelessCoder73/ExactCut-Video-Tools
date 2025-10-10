@@ -13,7 +13,7 @@ import sys # Import sys module
 # useful if you forget whether you input the correct frame rate or not.
 # NOW WORKS IN BATCH MODE!!!
 # This script was tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 # - VirtualDub2 (build 44282) .vdscript files
 #
 # Usage:

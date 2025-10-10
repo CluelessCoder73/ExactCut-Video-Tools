@@ -4,7 +4,7 @@ import os
 import shutil
 
 # Tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 
 # --- File patterns and script names ---
 CORRESPONDING_EXTENSIONS = [

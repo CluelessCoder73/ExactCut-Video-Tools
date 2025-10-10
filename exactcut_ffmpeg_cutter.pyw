@@ -10,7 +10,7 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 # Tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 # - FFmpeg (the version in LosslessCut 3.64.0)
 
 # --- Settings ---
@@ -101,7 +101,7 @@ class FFmpegCutterApp:
         self.root.title("ExactCut FFmpeg Cutter")
 
         self.start_offset_var = tk.IntVar(value=1)
-        self.end_offset_var = tk.IntVar(value=5)
+        self.end_offset_var = tk.IntVar(value=30)
         self.audio_mode_var = tk.StringVar(value="Copy") # Default
         self.audio_bitrate_var = tk.StringVar(value="128")
         self.container_mode_var = tk.StringVar(value="Same as source") # Default
@@ -369,12 +369,12 @@ The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
 
     self.start_offset_var = tk.IntVar(value=1)
-    self.end_offset_var = tk.IntVar(value=5)
+    self.end_offset_var = tk.IntVar(value=30)
     self.audio_mode_var = tk.StringVar(value='Copy')
     self.audio_bitrate_var = tk.StringVar(value='128')
     self.container_mode_var = tk.StringVar(value='Same as source')
 
-Enjoy frame-accurate cutting!"""
+Enjoy non-destructive cutting!"""
         messagebox.showinfo("Help - FFmpeg Cutter", help_text)
 
 # --- Run the Application ---

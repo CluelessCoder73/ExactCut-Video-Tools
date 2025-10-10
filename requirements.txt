@@ -1,4 +1,4 @@
-Python: Version 3.13.2 or newer (tested with this version, others may work).
+Python: Version 3.13.7 or newer (tested with this version, others may work).
 LosslessCut: 3.64.0 or newer (for merging the parts & access to FFmpeg).
 VirtualDub2: For creating your initial cutlists.
 HandBrake: For proxy video creation.

@@ -2,7 +2,7 @@ import os
 import re
 
 # Tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 # - VirtualDub2 (build 44282) .vdscript files
 # - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 

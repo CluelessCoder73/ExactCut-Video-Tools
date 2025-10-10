@@ -3,7 +3,7 @@ User Guide for gop_analyzer.py
 Purpose
 This script analyzes multiple VirtualDub `vdscript_range_adjuster.py` adjusted script files ("_adjusted.vdscript") to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are cutting video with ExactCut FFmpeg Cutter, and need to ensure frame-accurate cuts without losing the first GOP of any segment.
 # This script was tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 # - VirtualDub2 (build 44282) .vdscript files
 # - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
 

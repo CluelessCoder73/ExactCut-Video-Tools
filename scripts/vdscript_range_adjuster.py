@@ -4,7 +4,7 @@ Purpose
 This script is designed to adjust cut points in VirtualDub & VirtualDub2 script files (.vdscript) to ensure they align with legal frame boundaries, particularly useful when working with proxy videos for editing high-resolution footage. It guarantees that no frames are lost in the process, unlike most "stream copy" video editors. No need for aligning cut points with keyframes etc, because this script does all that for you automatically! After generating the adjusted .vdscript file, you can convert it to a Cuttermaran project file, an MKVToolNix GUI cutlist, or an *ExactCut FFmpeg Cutter cutlist via *vdscript_to_timecode_cutlist_generator.py (*included). More info at the bottom of this guide.
 This script now works in batch mode!
 # Tested and works with:
-# - Python 3.13.2
+# - Python 3.13.7
 # - VirtualDub 1.10.4 .vdscript files
 # - VirtualDub2 (build 44282) .vdscript files
 # - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
@@ -32,7 +32,7 @@ At the bottom of the script, you'll find several configurable parameters:
 directory = '.'
 i_frame_offset = 1
 merge_ranges_option = True
-min_gap_between_ranges = 100
+min_gap_between_ranges = 150
 short_cut_mode = True
 
 Adjust these parameters as needed:
@@ -187,7 +187,7 @@ def batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_
 directory = '.'  # Current directory, change if needed
 i_frame_offset = 1  # Increase this value to go further back in I-frames
 merge_ranges_option = True  # Set to False to disable merging
-min_gap_between_ranges = 100  # Minimum gap between ranges (in frames)
+min_gap_between_ranges = 150  # Minimum gap between ranges (in frames)
 short_cut_mode = True  # Set to False for "full GOP mode"
 
 batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
