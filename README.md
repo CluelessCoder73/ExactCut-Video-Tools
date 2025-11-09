@@ -120,7 +120,7 @@ ExactCut Video Tools streamlines your workflow into 10 steps:
 * It processes all vdscript files in the containing folder, & the output files will have '_info.txt' suffix. Then, just use Notepad++ or a diff checking app to inspect the differences between your original + "adjusted" vdscript files.
 
 * Runs `gop_analyzer.py`
-* Creates a file called `gop_info.txt`. If the smallest starting GOP in all vdscripts is "2" or more, you're good to go. If not, you may lose frames (unless you set "Start Frame Offset" to "0" in ExactCut FFmpeg Cutter). Read the instructions in the script for more info (only for perfectionists).
+* Creates a file called `gop_info.txt`. If the smallest starting GOP in all vdscripts is "5" or more, you're good to go. If it is less, you may lose frames (unless you lower the "Start Frame Offset" in ExactCut FFmpeg Cutter). Read the instructions in the script for more info.
 
 * Runs `exactcut_vfr_detector.pyw`
 * Creates a file called `VFR_info.txt`. It informs you about "variable frame rate" in any of your source videos. If any of your videos *are* VFR, they are *not* suitable for this workflow!

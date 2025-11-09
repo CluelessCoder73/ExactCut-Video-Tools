@@ -100,7 +100,7 @@ class FFmpegCutterApp:
         self.root = root
         self.root.title("ExactCut FFmpeg Cutter")
 
-        self.start_offset_var = tk.IntVar(value=1)
+        self.start_offset_var = tk.IntVar(value=4)
         self.end_offset_var = tk.IntVar(value=30)
         self.audio_mode_var = tk.StringVar(value="Copy") # Default
         self.audio_bitrate_var = tk.StringVar(value="128")
@@ -368,7 +368,7 @@ Configuration:
 The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
 
-    self.start_offset_var = tk.IntVar(value=1)
+    self.start_offset_var = tk.IntVar(value=4)
     self.end_offset_var = tk.IntVar(value=30)
     self.audio_mode_var = tk.StringVar(value='Copy')
     self.audio_bitrate_var = tk.StringVar(value='128')
