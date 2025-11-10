@@ -6,6 +6,9 @@
 
 YouTube video demonstration: https://www.youtube.com/watch?v=hnfdgPkV2K4&t=861s
 
+IMPORTANT!:
+The default "Start Frame Offset" value in ExactCut FFmpeg Cutter has been updated since this video was created, & is now "4" - which means that the "starting GOP" for each range must be at least "5"! This information can be found in the output file `gop_info.txt`. If there are any "starting GOPs" with values less than "5", the fix I describe in the video will work just fine :)
+
 ---
 
 ## The Problem with "Lossless" Video Editing
