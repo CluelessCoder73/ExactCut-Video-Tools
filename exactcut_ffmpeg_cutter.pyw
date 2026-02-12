@@ -11,7 +11,7 @@ from tkinter import ttk, filedialog, messagebox
 
 # Tested and works with:
 # - Python 3.13.7
-# - FFmpeg (the version in LosslessCut 3.64.0)
+# - FFmpeg (the version in LosslessCut 3.68.0)
 
 # --- Settings ---
 CUTLIST_SUFFIX = ".cutlist.txt"
@@ -31,11 +31,22 @@ def parse_timecode_cutlist(cutlist_path):
 
 def extract_fps(cutlist_path):
     with open(cutlist_path, 'r') as f:
-        first_line = f.readline()
+        first_line = f.readline().strip()
+        
+        # Check for the new VFR flag first
+        if "VFR_CALCULATED" in first_line:
+            # VFR video detected.
+            # We return a standard 30.0 fps to be used ONLY for calculating 
+            # the safety offsets (start_offset/end_offset).
+            return 30.0 
+        
+        # Fallback to original numeric check for older/standard cutlists
         match = re.match(r"#\s*fps\s*=\s*([\d.]+)", first_line)
         if match:
             return float(match.group(1))
-    raise ValueError("FPS not found in cutlist header")
+            
+    # If we get here, the header is missing or malformed
+    raise ValueError(f"FPS header not found or invalid in: {cutlist_path}")
 
 def run_ffmpeg_command(command, log_file, stop_event):
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1, shell=True) as process:
@@ -350,8 +361,10 @@ How It Works:
 
 Cutlist Format:
 Cutlist files (*.cutlist.txt) are plain text files with the following structure:
-- The first line must specify the video's FPS, e.g.:
-  # fps=23.976000
+- The first line must specify the FPS or the VFR flag, e.g.:
+  # fps=23.976000  (for Constant Frame Rate)
+  OR
+  # fps=VFR_CALCULATED (for Variable Frame Rate)
 - Subsequent lines define segments, each with a start time and duration in seconds:
   start_time=0.021000,duration=10.010010
   start_time=821.759000,duration=11.594928
