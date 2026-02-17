@@ -16,7 +16,7 @@ from tkinter import ttk, filedialog, messagebox
 # --- Settings ---
 CUTLIST_SUFFIX = ".cutlist.txt"
 LOG_FILENAME_TEMPLATE = "ffmpeg_log-{timestamp}.log"
-CONFIG_FILE = "exactcut_config.json" # New: Configuration file
+CONFIG_FILE = "exactcut_config.json"
 
 # --- Helper Functions ---
 def parse_timecode_cutlist(cutlist_path):
@@ -28,25 +28,6 @@ def parse_timecode_cutlist(cutlist_path):
             if match:
                 segments.append((float(match.group(1)), float(match.group(2))))
     return segments
-
-def extract_fps(cutlist_path):
-    with open(cutlist_path, 'r') as f:
-        first_line = f.readline().strip()
-        
-        # Check for the new VFR flag first
-        if "VFR_CALCULATED" in first_line:
-            # VFR video detected.
-            # We return a standard 30.0 fps to be used ONLY for calculating 
-            # the safety offsets (start_offset/end_offset).
-            return 30.0 
-        
-        # Fallback to original numeric check for older/standard cutlists
-        match = re.match(r"#\s*fps\s*=\s*([\d.]+)", first_line)
-        if match:
-            return float(match.group(1))
-            
-    # If we get here, the header is missing or malformed
-    raise ValueError(f"FPS header not found or invalid in: {cutlist_path}")
 
 def run_ffmpeg_command(command, log_file, stop_event):
     with subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, bufsize=1, shell=True) as process:
@@ -88,34 +69,33 @@ class ToolTip:
 
 # --- Configuration Management ---
 def load_config():
-    """Loads configuration from the JSON file."""
     config_path = Path(__file__).parent / CONFIG_FILE
     if config_path.exists():
         try:
             with open(config_path, 'r') as f:
                 return json.load(f)
         except json.JSONDecodeError:
-            return {} # Return empty if file is corrupt
+            return {}
     return {}
 
 def save_config(config):
-    """Saves configuration to the JSON file."""
     config_path = Path(__file__).parent / CONFIG_FILE
     with open(config_path, 'w') as f:
         json.dump(config, f, indent=4)
 
 # --- Main Application Class ---
-import webbrowser
 class FFmpegCutterApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("ExactCut FFmpeg Cutter")
+        self.root.title("ExactCut FFmpeg Cutter (MS Precision)")
 
-        self.start_offset_var = tk.IntVar(value=4)
-        self.end_offset_var = tk.IntVar(value=30)
-        self.audio_mode_var = tk.StringVar(value="Copy") # Default
+        # Defaults (MS)
+        self.start_offset_var = tk.IntVar(value=133)
+        self.end_offset_var = tk.IntVar(value=1000)
+        
+        self.audio_mode_var = tk.StringVar(value="Copy")
         self.audio_bitrate_var = tk.StringVar(value="128")
-        self.container_mode_var = tk.StringVar(value="Same as source") # Default
+        self.container_mode_var = tk.StringVar(value="Same as source")
 
         self.progress_var = tk.DoubleVar()
         self.time_remaining_var = tk.StringVar(value="")
@@ -125,7 +105,7 @@ class FFmpegCutterApp:
         self.load_last_directory()
 
         self.build_ui()
-        self.add_help_button()
+        self.add_top_buttons() # Changed from add_help_button
 
     def load_last_directory(self):
         config = load_config()
@@ -148,72 +128,66 @@ class FFmpegCutterApp:
 
     def build_ui(self):
         padding = {"padx": 5, "pady": 5}
-
         frame = ttk.Frame(self.root)
         frame.pack(padx=10, pady=10, fill=tk.BOTH, expand=True)
 
-        # Directory Selection UI
+        # Folder Selection
         ttk.Label(frame, text="Source Folder:").grid(row=0, column=0, sticky=tk.W, **padding)
         self.dir_entry = ttk.Entry(frame, textvariable=self.selected_dir_var, state="readonly", width=50)
         self.dir_entry.grid(row=0, column=1, columnspan=2, sticky=(tk.W, tk.E), **padding)
-        ToolTip(self.dir_entry, "The folder where cutlist and video files are located.")
         
         browse_button = ttk.Button(frame, text="Browse", command=self.browse_directory)
         browse_button.grid(row=0, column=3, sticky=tk.W, **padding)
-        ToolTip(browse_button, "Select the folder containing your video and cutlist files.")
 
-        ttk.Label(frame, text="Start Frame Offset:").grid(row=1, column=0, sticky=tk.W, **padding)
-        start_entry = ttk.Entry(frame, textvariable=self.start_offset_var, width=6)
-        start_entry.grid(row=1, column=1, sticky=tk.W, **padding)
-        ToolTip(start_entry, "Shift the start of each segment forward by this many frames.")
+        # Offsets in Milliseconds
+        ttk.Label(frame, text="Start Offset (ms):").grid(row=1, column=0, sticky=tk.W, **padding)
+        self.start_entry = ttk.Entry(frame, textvariable=self.start_offset_var, width=6)
+        self.start_entry.grid(row=1, column=1, sticky=tk.W, **padding)
+        ToolTip(self.start_entry, "Safety buffer in milliseconds (e.g., 150 = 0.15s).")
 
-        ttk.Label(frame, text="End Frame Offset:").grid(row=1, column=2, sticky=tk.W, **padding)
-        end_entry = ttk.Entry(frame, textvariable=self.end_offset_var, width=6)
-        end_entry.grid(row=1, column=3, sticky=tk.W, **padding)
-        ToolTip(end_entry, "Shift the end of each segment forward by this many frames.")
+        ttk.Label(frame, text="End Offset (ms):").grid(row=1, column=2, sticky=tk.W, **padding)
+        self.end_entry = ttk.Entry(frame, textvariable=self.end_offset_var, width=6)
+        self.end_entry.grid(row=1, column=3, sticky=tk.W, **padding)
+        ToolTip(self.end_entry, "End buffer in milliseconds (e.g., 1000 = 1.0s).")
 
+        # Audio Settings
         ttk.Label(frame, text="Audio Mode:").grid(row=2, column=0, sticky=tk.W, **padding)
-        # Updated: Added "WAV" to the audio mode options
         self.audio_menu = ttk.Combobox(frame, textvariable=self.audio_mode_var, values=["Copy", "AAC", "MP3", "WAV"], state="readonly", width=10)
         self.audio_menu.grid(row=2, column=1, sticky=tk.W, **padding)
-        self.audio_menu.bind("<<ComboboxSelected>>", self.on_audio_mode_change) # Bind to new consolidated function
-        ToolTip(self.audio_menu, "Choose whether to copy audio (lossless) or re-encode. WAV is uncompressed.")
+        self.audio_menu.bind("<<ComboboxSelected>>", self.on_audio_mode_change)
 
         self.bitrate_label = ttk.Label(frame, text="Bitrate (kbps):")
         self.bitrate_label.grid(row=2, column=2, sticky=tk.W, **padding)
 
         self.bitrate_menu = ttk.Combobox(frame, textvariable=self.audio_bitrate_var, values=["128", "160", "192"], state="readonly", width=6)
         self.bitrate_menu.grid(row=2, column=3, sticky=tk.W, **padding)
-        ToolTip(self.bitrate_menu, "Choose the bitrate to use if re-encoding audio. Not applicable for Copy or WAV modes.")
 
+        # Container Settings
         ttk.Label(frame, text="Output Container:").grid(row=3, column=0, sticky=tk.W, **padding)
-        # Stored reference to container_menu for state changes
         self.container_menu = ttk.Combobox(frame, textvariable=self.container_mode_var, values=["Same as source", "MP4", "MOV", "MKV"], state="readonly", width=15)
         self.container_menu.grid(row=3, column=1, columnspan=3, sticky=tk.W, **padding)
-        self.container_menu.bind("<<ComboboxSelected>>", self.on_container_mode_change) # Bind to new consolidated function
-        ToolTip(self.container_menu, "Choose the output file format (container type). MKV is recommended for WAV audio.")
+        self.container_menu.bind("<<ComboboxSelected>>", self.on_container_mode_change)
 
+        # Buttons
         ttk.Button(frame, text="Start Cutting", command=self.start_cutting).grid(row=4, column=0, pady=10)
         ttk.Button(frame, text="Cancel", command=self.cancel_processing).grid(row=4, column=1, pady=10)
 
+        # Progress
         ttk.Progressbar(frame, variable=self.progress_var, maximum=100).grid(row=5, column=0, columnspan=4, sticky="we", **padding)
         ttk.Label(frame, textvariable=self.time_remaining_var).grid(row=6, column=0, columnspan=4, sticky=tk.W, **padding)
 
-        # Initial call to set correct states
-        self.on_audio_mode_change() # Use the new function for initial setup
+        self.on_audio_mode_change()
 
     def on_audio_mode_change(self, *args):
         self.toggle_bitrate_visibility()
         self.toggle_container_for_wav()
 
     def on_container_mode_change(self, *args):
-        # This will mainly be used if we need to react to container changes
-        # independently, but for WAV, audio mode change is primary.
         pass
 
     def toggle_bitrate_visibility(self):
         mode = self.audio_mode_var.get().lower()
-        if mode in ["copy", "wav"]: # Added "wav"
+        if mode in ["copy", "wav"]:
             self.bitrate_label.grid_remove()
             self.bitrate_menu.grid_remove()
         else:
@@ -221,14 +195,11 @@ class FFmpegCutterApp:
             self.bitrate_menu.grid()
 
     def toggle_container_for_wav(self):
-        current_audio_mode = self.audio_mode_var.get()
-        if current_audio_mode == "WAV":
-            # If WAV is selected, force container to MKV and disable selection
+        if self.audio_mode_var.get() == "WAV":
             if self.container_mode_var.get() != "MKV":
                 self.container_mode_var.set("MKV")
             self.container_menu.config(state="disabled")
         else:
-            # Re-enable container selection for other audio modes
             self.container_menu.config(state="readonly")
 
     def cancel_processing(self):
@@ -240,23 +211,24 @@ class FFmpegCutterApp:
     def process_cutlists(self):
         source_dir = Path(self.selected_dir_var.get())
         if not source_dir.is_dir():
-            messagebox.showerror("Invalid Folder", "Please select a valid source folder.")
+            messagebox.showerror("Error", "Invalid source folder.")
             return
 
         cutlist_files = [f for f in source_dir.iterdir() if f.name.endswith(CUTLIST_SUFFIX)]
         if not cutlist_files:
-            messagebox.showerror("No Cutlists Found", f"No files ending with '{CUTLIST_SUFFIX}' found in {source_dir}.")
+            messagebox.showerror("Error", f"No '{CUTLIST_SUFFIX}' files found.")
             return
 
         timestamp = datetime.now().strftime("%y-%m-%d_%H-%M-%S")
         log_file_path = source_dir / LOG_FILENAME_TEMPLATE.format(timestamp=timestamp)
+        
         total_segments = 0
         for cutlist_file in cutlist_files:
             segments = parse_timecode_cutlist(cutlist_file)
             total_segments += len(segments)
 
         if total_segments == 0:
-            messagebox.showinfo("No Segments", "No valid segments found in any cutlist.")
+            messagebox.showinfo("Info", "No valid segments found.")
             return
 
         self.progress_var.set(0)
@@ -266,110 +238,159 @@ class FFmpegCutterApp:
 
         with open(log_file_path, "w", encoding="utf-8") as log_file:
             for cutlist_path in cutlist_files:
-                if self.stop_event.is_set():
-                    break
-
-                try:
-                    framerate = extract_fps(cutlist_path)
-                except Exception as e:
-                    log_file.write(f"Error reading FPS from {cutlist_path.name}: {e}\n")
-                    continue
+                if self.stop_event.is_set(): break
 
                 input_file_name = cutlist_path.name.replace(CUTLIST_SUFFIX, "")
                 input_file = source_dir / input_file_name
+                
                 if not input_file.exists():
-                    log_file.write(f"Missing input file for cutlist {cutlist_path.name}: {input_file}\n")
+                    log_file.write(f"Missing input file: {input_file}\n")
                     continue
 
                 segments = parse_timecode_cutlist(cutlist_path)
-                time_offset_start = self.start_offset_var.get() / framerate
-                time_offset_end = self.end_offset_var.get() / framerate
+                
+                time_offset_start = self.start_offset_var.get() / 1000.0
+                time_offset_end = self.end_offset_var.get() / 1000.0
 
                 output_dir = source_dir / input_file.stem
                 output_dir.mkdir(parents=True, exist_ok=True)
 
-                # Determine output extension
                 output_container = self.container_mode_var.get()
-                if output_container == "Same as source":
-                    ext = input_file.suffix
-                else:
-                    ext = f".{output_container.lower()}"
-
-                # Determine audio flag based on selected mode
+                ext = input_file.suffix if output_container == "Same as source" else f".{output_container.lower()}"
+                
                 audio_mode = self.audio_mode_var.get().lower()
-                if audio_mode == "copy":
-                    audio_flag = "-c:a copy"
-                elif audio_mode == "wav":
-                    audio_flag = "-c:a pcm_s16le" # Standard uncompressed PCM for WAV
-                else: # AAC or MP3
-                    audio_flag = f"-c:a {audio_mode} -b:a {self.audio_bitrate_var.get()}k"
+                if audio_mode == "copy": audio_flag = "-c:a copy"
+                elif audio_mode == "wav": audio_flag = "-c:a pcm_s16le"
+                else: audio_flag = f"-c:a {audio_mode} -b:a {self.audio_bitrate_var.get()}k"
 
-                for i, (start_time_orig, duration_orig) in enumerate(segments):
-                    if self.stop_event.is_set():
-                        break
+                for i, (start_ts, duration) in enumerate(segments):
+                    if self.stop_event.is_set(): break
 
-                    start_time_adj = start_time_orig + time_offset_start
-                    end_time_adj = start_time_orig + duration_orig + time_offset_end
-                    duration_adj = end_time_adj - start_time_adj
+                    adj_start = start_ts + time_offset_start
+                    adj_end = start_ts + duration + time_offset_end
+                    adj_duration = adj_end - adj_start
 
                     output_file = output_dir / f"{input_file.stem}_part_{i+1:03d}{ext}"
                     cmd = (
-                        f"ffmpeg -ss {start_time_adj:.6f} -i \"{input_file}\" -t {duration_adj:.6f} -c:v copy {audio_flag} -avoid_negative_ts make_zero \"{output_file}\""
+                        f"ffmpeg -ss {adj_start:.6f} -i \"{input_file}\" -t {adj_duration:.6f} "
+                        f"-c:v copy {audio_flag} -avoid_negative_ts make_zero \"{output_file}\""
                     )
-                    log_file.write(f"Running: {cmd}\n")
-
-                    return_code = run_ffmpeg_command(cmd, log_file, self.stop_event)
-                    log_file.write(f"Exit code: {return_code}\n\n")
-
+                    
+                    log_file.write(f"Seg {i+1}: {cmd}\n")
+                    run_ffmpeg_command(cmd, log_file, self.stop_event)
+                    
                     processed_segments += 1
                     self.progress_var.set((processed_segments / total_segments) * 100)
-
+                    
                     elapsed = time.time() - start_time
                     if processed_segments > 0:
                         rate = elapsed / processed_segments
                         remaining = (total_segments - processed_segments) * rate
-                        self.time_remaining_var.set(f"Estimated time remaining: {int(remaining)} sec")
-                    else:
-                        self.time_remaining_var.set("Calculating...")
-
+                        self.time_remaining_var.set(f"Remaining: {int(remaining)}s")
 
         self.time_remaining_var.set("Done.")
-        if self.stop_event.is_set():
-            messagebox.showinfo("Cancelled", "Processing was cancelled.")
-        else:
-            messagebox.showinfo("Completed", f"All segments processed. Log saved to:\n{log_file_path}")
+        if not self.stop_event.is_set():
+            messagebox.showinfo("Completed", f"Processed {processed_segments} segments.\nLog: {log_file_path.name}")
         self.stop_event.clear()
 
-    def add_help_button(self):
-        help_button = ttk.Button(self.root, text="? Help", command=self.show_help)
-        help_button.pack(anchor="ne", padx=10, pady=5)
+    # --- NEW: Top Buttons (Help + Calculator) ---
+    def add_top_buttons(self):
+        # Frame to hold buttons at the top right
+        btn_frame = ttk.Frame(self.root)
+        btn_frame.pack(anchor="ne", padx=10, pady=5)
+        
+        calc_button = ttk.Button(btn_frame, text="🧮 Calculator", command=self.open_calculator)
+        calc_button.pack(side="left", padx=5)
+
+        help_button = ttk.Button(btn_frame, text="? Help", command=self.show_help)
+        help_button.pack(side="left")
+
+    # --- NEW: Calculator Logic ---
+    def open_calculator(self):
+        calc_win = tk.Toplevel(self.root)
+        calc_win.title("Frame to MS Calculator")
+        calc_win.geometry("260x220")
+        
+        # Center the window
+        x = self.root.winfo_x() + 50
+        y = self.root.winfo_y() + 50
+        calc_win.geometry(f"+{x}+{y}")
+
+        ttk.Label(calc_win, text="Video FPS:").pack(pady=(10,0))
+        fps_entry = ttk.Entry(calc_win, width=10, justify="center")
+        fps_entry.pack(pady=2)
+        fps_entry.insert(0, "23.976") # Default
+
+        ttk.Label(calc_win, text="Frames to Add:").pack(pady=(5,0))
+        frames_entry = ttk.Entry(calc_win, width=10, justify="center")
+        frames_entry.pack(pady=2)
+        frames_entry.insert(0, "4") # Default
+
+        result_var = tk.StringVar(value="---")
+        ttk.Label(calc_win, textvariable=result_var, font=("Segoe UI", 12, "bold"), foreground="#007acc").pack(pady=10)
+
+        def calculate():
+            try:
+                fps = float(fps_entry.get())
+                frames = float(frames_entry.get())
+                if fps <= 0: raise ValueError
+                ms = (1000.0 / fps) * frames
+                result_var.set(f"{int(round(ms))} ms")
+            except ValueError:
+                result_var.set("Error")
+
+        ttk.Button(calc_win, text="Calculate", command=calculate).pack(pady=5)
+        
+        # Buttons to apply result to main window
+        btn_frame = ttk.Frame(calc_win)
+        btn_frame.pack(pady=5)
+
+        def apply_start():
+            val = result_var.get().replace(" ms", "")
+            if val.isdigit():
+                self.start_offset_var.set(int(val))
+
+        def apply_end():
+            val = result_var.get().replace(" ms", "")
+            if val.isdigit():
+                self.end_offset_var.set(int(val))
+
+        ttk.Button(btn_frame, text="Set Start", command=apply_start, width=8).pack(side="left", padx=2)
+        ttk.Button(btn_frame, text="Set End", command=apply_end, width=8).pack(side="left", padx=2)
 
     def show_help(self):
-        help_text = """ExactCut FFmpeg Cutter Help
+        msg = """ExactCut FFmpeg Cutter (MS Precision Edition)
+-------------------------------------------------------------
+HOW TO USE:
+1. Ensure your folder contains video files and corresponding .cutlist.txt files.
+2. Select that folder above.
+3. Adjust your Safety Offsets (in milliseconds).
+4. Choose your Audio/Container settings and click 'Start Cutting'.
 
-This tool performs FFmpeg segment cutting based on cutlist files.
+-------------------------------------------------------------
+UNDERSTANDING OFFSETS (MILLISECONDS):
+This tool uses TIME, not frames, for maximum precision with VFR video.
+1000 ms = 1 Second.
 
-How It Works:
-- This app now allows you to select a folder containing your *.cutlist.txt files.
-- Each cutlist must be generated by `vdscript_to_timecode_cutlist_generator.py`
-  which parses VirtualDub .vdscript files and a frame log.
-- This app matches each cutlist with its corresponding video file (e.g. myvideo.mkv)
-  within the *selected folder*.
-- Segments are cut using precise timecodes, and output to a subfolder
-  (e.g. /selected_folder/myvideo/) within the *selected folder*.
-- All FFmpeg output is saved to a single timestamped log file in the *selected folder*.
+If you want to add a specific number of "frames" as a buffer, 
+use the CALCULATOR button (top right) or this cheat sheet:
 
-Cutlist Format:
-Cutlist files (*.cutlist.txt) are plain text files with the following structure:
-- The first line must specify the FPS or the VFR flag, e.g.:
-  # fps=23.976000  (for Constant Frame Rate)
-  OR
-  # fps=VFR_CALCULATED (for Variable Frame Rate)
-- Subsequent lines define segments, each with a start time and duration in seconds:
-  start_time=0.021000,duration=10.010010
-  start_time=821.759000,duration=11.594928
-  ...and so on.
+FRAME RATE (FPS)      1 FRAME DURATION      4 FRAMES (Approx)
+-------------------------------------------------------------
+  23.976 fps   ---->    41.7 ms            167 ms
+  24.000 fps   ---->    41.7 ms            167 ms
+  25.000 fps   ---->    40.0 ms            160 ms
+  29.970 fps   ---->    33.4 ms            133 ms
+  30.000 fps   ---->    33.3 ms            133 ms
+  50.000 fps   ---->    20.0 ms             80 ms
+  59.940 fps   ---->    16.7 ms             67 ms
+  60.000 fps   ---->    16.7 ms             67 ms
 
+Example: 
+To add a 4-frame buffer for a 60fps video:
+4 * 16.7 = ~67 ms. Enter '67' in the Offset box.
+
+-------------------------------------------------------------
 Audio Modes:
 - Copy: Losslessly copies the audio stream. No re-encoding. Bitrate not applicable.
 - AAC / MP3: Re-encodes audio to the selected lossy format at a specified bitrate.
@@ -381,16 +402,26 @@ Configuration:
 The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
 
-    self.start_offset_var = tk.IntVar(value=4)
-    self.end_offset_var = tk.IntVar(value=30)
-    self.audio_mode_var = tk.StringVar(value='Copy')
-    self.audio_bitrate_var = tk.StringVar(value='128')
-    self.container_mode_var = tk.StringVar(value='Same as source')
+    self.start_offset_var = tk.IntVar(value=133)
+    self.end_offset_var = tk.IntVar(value=1000)
+    self.audio_mode_var = tk.StringVar(value="Copy")
+    self.audio_bitrate_var = tk.StringVar(value="128")
+    self.container_mode_var = tk.StringVar(value="Same as source")
+"""
+        help_win = tk.Toplevel(self.root)
+        help_win.title("ExactCut Help")
+        help_win.geometry("500x550")
+        
+        text_area = tk.Text(help_win, wrap="word", padx=10, pady=10, font=("Consolas", 9))
+        text_area.insert("1.0", msg)
+        text_area.config(state="disabled") 
+        
+        scrollbar = ttk.Scrollbar(help_win, command=text_area.yview)
+        text_area.configure(yscrollcommand=scrollbar.set)
+        
+        scrollbar.pack(side="right", fill="y")
+        text_area.pack(side="left", fill="both", expand=True)
 
-Enjoy non-destructive cutting!"""
-        messagebox.showinfo("Help - FFmpeg Cutter", help_text)
-
-# --- Run the Application ---
 if __name__ == "__main__":
     root = tk.Tk()
     app = FFmpegCutterApp(root)
