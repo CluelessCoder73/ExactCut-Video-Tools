@@ -4,7 +4,7 @@ ExactCut VFR Detector (exactcut_vfr_detector.pyw)
 This script scans FFmpeg *_frame_log.txt files for Variable Frame Rate (VFR), using forgiving parameters to reduce false positives.
 # Tested and works with:
 # - Python 3.13.7
-# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.68.0)
 
 **Purpose:**
 This script scans all `*_frame_log.txt` files in the chosen directory to detect whether any videos were encoded using **Variable Frame Rate (VFR)**. It also flags files with **suspiciously small frame duration differences**, which are often falsely reported as VFR by tools like MediaInfo.
@@ -212,11 +212,9 @@ def run_detection_and_save_to_file(folder_path, output_filename="VFR_info.txt",
 
     output_lines.append("\n# Summary\n")
     if vfr_videos_detected:
-        output_lines.append("WARNING: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
-        output_lines.append("Ensure duration-based cutlists are accurate for these.\n")
+        output_lines.append("VFR NOTED: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
     else:
         output_lines.append("All videos appear to use Constant Frame Rate (CFR) based on forgiving detection.\n")
-        output_lines.append("No VFR issues detected that should impact duration-based cutlists.\n")
 
     output_lines.append("\n--- Report End ---\n")
 
@@ -371,11 +369,9 @@ class VFRDetectorApp:
 
             output_lines_for_gui.append("\n# Summary\n")
             if vfr_videos_detected:
-                output_lines_for_gui.append("WARNING: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
-                output_lines_for_gui.append("Ensure duration-based cutlists are accurate for these.\n")
+                output_lines_for_gui.append("VFR NOTED: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
             else:
                 output_lines_for_gui.append("All videos appear to use Constant Frame Rate (CFR) based on forgiving detection.\n")
-                output_lines_for_gui.append("No VFR issues detected that should impact duration-based cutlists.\n")
 
             output_lines_for_gui.append("\n--- Detection Complete ---\n")
 
