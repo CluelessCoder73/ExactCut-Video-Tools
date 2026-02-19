@@ -2,38 +2,31 @@
 REM Batch file to automate Python scripts for ExactCut Video Tools.
 REM This file should be placed in the same folder as the Python scripts and input files.
 
-REM --- 1. Get Frame Rate from User ---
-set /p "frame_rate=Enter the frame rate (e.g., 23.976, 25, 29.97, 60) for your video(s): "
-echo.
+setlocal
+:: Get the current folder path for the VFR detector
+set "CURRENT_DIR=%~dp0"
 
-REM --- 2. Run vdscript_range_adjuster.py ---
-echo Running vdscript_range_adjuster.py...
+echo [1/5] Running: vdscript_range_adjuster.py...
 python vdscript_range_adjuster.py
-echo.
 
-REM --- 3. Run vdscript_info.py ---
-echo Running vdscript_info.py...
-REM Pass the stored frame rate directly to vdscript_info.py using echo
-echo %frame_rate%| python vdscript_info.py
 echo.
+echo [2/5] Running: vdscript_vfr_info.py...
+python vdscript_vfr_info.py
 
-REM --- 4. Run gop_analyzer.py ---
-echo Running gop_analyzer.py...
+echo.
+echo [3/5] Running: gop_analyzer.py...
 python gop_analyzer.py
-echo.
 
-REM --- 5. Run exactcut_vfr_detector.pyw (now in batch mode) ---
-echo Running exactcut_vfr_detector.pyw in batch mode...
-REM The --path argument tells the script where to find the _frame_log.txt files.
-REM %CD% expands to the current directory where the batch file is run.
-python exactcut_vfr_detector.pyw --batch-mode --path "%CD%"
 echo.
+echo [4/5] Running: exactcut_vfr_detector.pyw (Batch Mode)...
+:: Running in batch mode requires the --batch-mode flag and the folder path
+python exactcut_vfr_detector.pyw --batch-mode --path "%CURRENT_DIR%."
 
-REM --- 6. Run vdscript_to_timecode_cutlist_generator.py ---
-echo Running vdscript_to_timecode_cutlist_generator.py...
-REM Pass the stored frame rate directly to vdscript_to_timecode_cutlist_generator.py using echo
-echo %frame_rate%| python vdscript_to_timecode_cutlist_generator.py
 echo.
+echo [5/5] Running: vdscript_to_timecode_cutlist_generator.py...
+python vdscript_to_timecode_cutlist_generator.py
 
-echo All Python scripts have been executed.
+echo.
+echo ---------------------------------------------------
+echo ALL SCRIPTS FINISHED.
 pause
