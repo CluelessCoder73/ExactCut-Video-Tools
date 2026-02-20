@@ -363,17 +363,29 @@ class FFmpegCutterApp:
 -------------------------------------------------------------
 HOW TO USE:
 1. Ensure your folder contains video files and corresponding .cutlist.txt files.
-2. Select that folder above.
-3. Adjust your Safety Offsets (in milliseconds).
-4. Choose your Audio/Container settings and click 'Start Cutting'.
+2. Select the folder above.
+3. Adjust your Millisecond Offsets.
+4. Choose Audio/Container settings and click 'Start Cutting'.
 
 -------------------------------------------------------------
 UNDERSTANDING OFFSETS (MILLISECONDS):
-This tool uses TIME, not frames, for maximum precision with VFR video.
-1000 ms = 1 Second.
+This tool uses TIME (ms) for maximum precision. 1000 ms = 1 Second.
 
-If you want to add a specific number of "frames" as a buffer, 
-use the CALCULATOR button (top right) or this cheat sheet:
+START OFFSET (The "Seek Nudge"):
+- This is NOT a buffer; it pushes the seek point slightly forward.
+- Since your cutlists are keyframe-aligned, this 'nudge' ensures 
+  FFmpeg snaps to the correct keyframe rather than the previous one.
+- Recommended: 100ms to 200ms. (0ms will cause approx 10s of unwanted video in many of the output segments).
+
+END OFFSET (The "Safety Buffer"):
+- This adds extra duration to the end of the segment.
+- Use this to ensure a scene isn't cut too abruptly.
+- Recommended: 1000ms (1 second).
+
+-------------------------------------------------------------
+FRAME RATE MS CHEAT SHEET (For 4 Frames):
+To calculate a specific number of frames, use the CALCULATOR 
+button or the approximate values below:
 
 FRAME RATE (FPS)      1 FRAME DURATION      4 FRAMES (Approx)
 -------------------------------------------------------------
@@ -387,8 +399,8 @@ FRAME RATE (FPS)      1 FRAME DURATION      4 FRAMES (Approx)
   60.000 fps   ---->    16.7 ms             67 ms
 
 Example: 
-To add a 4-frame buffer for a 60fps video:
-4 * 16.7 = ~67 ms. Enter '67' in the Offset box.
+To add a 4-frame seek nudge for a 60fps video:
+4 * 16.7 = ~67 ms. Enter '67' in the Start Offset box.
 
 -------------------------------------------------------------
 Audio Modes:
@@ -410,7 +422,8 @@ Other default values can still be changed by editing this file. Look for:
 """
         help_win = tk.Toplevel(self.root)
         help_win.title("ExactCut Help")
-        help_win.geometry("500x550")
+        help_win.geometry("520x600")
+        help_win.transient(self.root) # Keeps help window on top of main app
         
         text_area = tk.Text(help_win, wrap="word", padx=10, pady=10, font=("Consolas", 9))
         text_area.insert("1.0", msg)
