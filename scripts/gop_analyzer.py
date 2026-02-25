@@ -1,83 +1,79 @@
 """
-User Guide for gop_analyzer.py
-Purpose
-This script analyzes multiple VirtualDub `vdscript_range_adjuster.py` adjusted script files ("_adjusted.vdscript") to determine the size of the starting GOP (Group of Pictures) for each range. It's particularly useful for users who are cutting video with ExactCut FFmpeg Cutter, and need to ensure frame-accurate cuts without losing the first GOP of any segment.
+================================================================================
+ExactCut GOP Analyzer (gop_analyzer.py)
+================================================================================
+
 # This script was tested and works with:
 # - Python 3.13.7
 # - VirtualDub2 (build 44282) .vdscript files
-# - "FFmpeg" generated frame log files (the version in LosslessCut 3.64.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.68.0)
 
-Features
+PURPOSE:
+This script is an OCD-level safety net for your ExactCut workflow. It analyzes 
+your adjusted VirtualDub script files ("_adjusted.vdscript") to determine the 
+size of the starting GOP (Group of Pictures) for every single cut segment.
 
-    Reads frame information from frame log files
-    Analyzes ranges in corresponding VirtualDub script files (must have the same name, but with "_adjusted.vdscript" appended instead of "_frame_log.txt")
-    Calculates the size of the starting GOP for each range
-    Identifies the smallest starting GOP across all ranges
-    Repeats this process for every "_adjusted.vdscript"
-    Gives final "Smallest starting GOP in all vdscripts" result
-        
+WHY DOES THIS MATTER?
+In the ExactCut FFmpeg Cutter, we use a "Start Offset (ms)" (a Seek Nudge) to 
+push FFmpeg slightly past the cut point, forcing it to snap to the correct 
+keyframe. 
 
-Prerequisites
+However, if your video has an ultra-short GOP right at the start of a segment 
+(e.g., a GOP that is only 2 frames long), and your Seek Nudge is longer than 
+that GOP (e.g., a 4-frame nudge), FFmpeg will jump entirely over the first 
+keyframe and snap to the next one! This results in lost frames.
 
-    Python 3.x installed on your system
-    Input .vdscript file(s) (output from vdscript_range_adjuster.py)
-    Frame log file(s) (videofilename_frame_log.txt) containing frame type information
+This script scans all your files and reports the "Smallest starting GOP" across 
+all segments, warning you if your Seek Nudge might be dangerously long.
 
-Setup
+PREREQUISITES:
+- Python 3.x
+- Output files from vdscript_range_adjuster.py ("_adjusted.vdscript")
+- Matching FFmpeg frame log files ("_frame_log.txt")
 
-    Save the script as "gop_analyzer.py" in your working directory.
-    Place your input vdscript files and matching frame log files in the same directory.
-
-Usage
-
-    Open a terminal or command prompt.
-    Navigate to the directory containing the script and input files.
-    Run the script:
-
+USAGE:
+Run the script in the same folder as your files:
     python gop_analyzer.py
 
-    The script will process your input files and create an output file (default: gop_info.txt) with GOP size information for all vdscripts which end with "_adjusted.vdscript", & the overall shortest at the very bottom.
+OUTPUT (gop_info.txt):
+The script will generate a list of all segments and their starting GOP sizes, 
+with a summary at the bottom:
+    Smallest starting GOP in all vdscripts: 17 frames ("video2.mp4_adjusted.vdscript")
 
-Example output:
+================================================================================
+HOW TO FIX ULTRA-SHORT GOPs USING EXACTCUT FFMPEG CUTTER
+================================================================================
+If the "Smallest starting GOP" is comfortably larger than your intended Seek Nudge 
+(e.g., the smallest GOP is 250 frames, and you are only nudging by 4 frames), 
+you are perfectly safe! Do nothing.
 
-Name: "video1.mp4_adjusted.vdscript"
-250
-250
+However, if the smallest starting GOP is dangerously small (e.g., 2 frames), 
+you MUST take action to avoid losing frames. You have two options:
 
-Smallest starting GOP: 250 frames
----------------------------------
+METHOD 1: Expand the Segment using the ExactCut Editor (Recommended)
+By pushing the start of the offending segment back to an earlier keyframe, you 
+absorb the tiny GOP safely into the middle of the video segment.
+    1. Open ExactCut FFmpeg Cutter.
+    2. Open the "✏️ Editor" tool and load your `.cutlist.txt`.
+    3. Look at `gop_info.txt` to identify which segment # has the tiny GOP.
+    4. In the Editor, use "1. Expand Start Earlier" on that Line #. 
+       (Add 1.0 or 2.0 seconds to push it safely back).
+    5. Save and proceed!
 
-Name: "video2.mp4_adjusted.vdscript"
-138
-200
-17
-
-Smallest starting GOP: 17 frames
----------------------------------
-
---------------------------------------------------
---------------------------------------------------
-Smallest starting GOP in all vdscripts: 17 frames ("video2.mp4_adjusted.vdscript")
-
-How to Use the Results
-
-    The "Smallest starting GOP" value is "+1" greater than the maximum number of frames you can safely shift the start frame offset in ExactCut FFmpeg Cutter without risking the loss of the first GOP in any segment.
-    When adjusting your start frame offset in ExactCut FFmpeg Cutter, ensure that you don't enter this (or more than this) number of frames.
-    DETAILED EXPLAINATION: Provided you haven't changed the start frame offset default value ("4"), the "Smallest starting GOP" needs to be at least "5". If it is lower than that, you can either:
-    1) Lower the start frame offset value in ExactCut FFmpeg Cutter (so that it's smaller than your "Smallest starting GOP" value). This will guarantee that you don't lose ANY frames from the start of any segment, but your output video(s) may be significantly longer.
-    2) (The best method) - Open your output *.cutlist.txt file, find the offending segment (`gop_info.txt` lists all starting GOPs in chronological order), subtract 1 second from the start time, & add 1 second to the duration. Repeat this process for all the offending segments. If there are too many offending segments, then the 1st method may be preferable.
-    This approach allows you to fine-tune your cuts for frame accuracy while maintaining the integrity of each segment's starting GOP.
-
-Tip for Optimal Use
-
-    Always run this script on the output from vdscript_range_adjuster.py to ensure you're working with adjusted, legal cut points.
-
-Troubleshooting
-
-    If the script fails to run, ensure you have Python 3.x installed.
-    If the output seems incorrect, double-check your frame log file to ensure it matches your video file.
-
-This script, used in conjunction with vdscript_range_adjuster.py, provides a powerful solution for ensuring accurate, lossless cuts when working with ExactCut FFmpeg Cutter.
+METHOD 2: Lower your Seek Nudge using the Calculator
+If you don't want to change your cut points, you must make your Seek Nudge 
+smaller than the tiny GOP.
+    1. Open ExactCut FFmpeg Cutter.
+    2. Open the "🧮 Calculator" tool.
+    3. Enter your video's FPS.
+    4. Enter a frame count strictly LESS than the "Smallest starting GOP". 
+       (e.g., If the smallest GOP is 2 frames, enter '1').
+    5. Click "Calculate" and then "Set Start" to apply this ultra-small 
+       nudge to your Start Offset (ms).
+       
+*Note: A very small Seek Nudge increases the risk of FFmpeg snapping backward 
+and including unwanted video, which is why Method 1 is preferred!*
+================================================================================
 """
 import os
 import re
