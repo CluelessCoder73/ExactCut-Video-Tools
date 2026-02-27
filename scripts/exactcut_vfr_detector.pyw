@@ -9,84 +9,7 @@ This script scans FFmpeg *_frame_log.txt files for Variable Frame Rate (VFR), us
 **Purpose:**
 This script scans all `*_frame_log.txt` files in the chosen directory to detect whether any videos were encoded using **Variable Frame Rate (VFR)**. It also flags files with **suspiciously small frame duration differences**, which are often falsely reported as VFR by tools like MediaInfo.
 
-The script operates in two modes:
-1. GUI Mode (Interactive)
-
-Interactive GUI for VFR detection.
-How to Run:
-
-    Double-click exactcut_vfr_detector.pyw.
-
-GUI Elements:
-
-    Detection Parameters:
-
-        Ignore First N Frames: (Default: 50). Skips initial frames to avoid false VFR from zero-duration logs.
-
-        Ignore 0.0 Duration Frames: (Default: checked). Ignores frames with 0.0 duration_time.
-
-        Duration Tolerance (seconds): (Default: 0.00005). Treats durations as identical if their absolute difference is below this value, preventing false VFR from minor rounding errors. (0.00005s is robust for common FPS).
-
-    Select Folder:
-
-        Browse for Folder: Select directory containing *_frame_log.txt files.
-
-    Action Buttons:
-
-        Run VFR Detection: Scans files in selected folder; displays results.
-
-        Save Output to File: Saves output to a .txt file.
-
-    Output Text Area: Displays detection progress, status, and unique frame durations (filtered/grouped).
-
-2. Batch Mode (Command-Line)
-
-Automated mode for batch scripts; runs silently, saves report to file.
-How to Run:
-
-    Run from command prompt/batch file:
-
-    python exactcut_vfr_detector.pyw --batch-mode --path "C:\path\to\your\log\files"
-
-        --batch-mode: Non-GUI execution.
-
-        --path: Mandatory directory for log files.
-
-Optional Batch Mode Arguments:
-
-    Override defaults:
-
-        --ignore-initial-frames <number> (Default: 50)
-
-        --ignore-zero-duration <True/False> (Default: True)
-
-        --duration-tolerance <float> (Default: 0.00005)
-
-Batch Mode Behavior:
-
-    No GUI.
-
-    Defaults: Parameters default as above if not specified.
-
-    Output: Report automatically saves to VFR_info.txt in the --path directory. Minimal console output.
-
-Output Report (VFR_info.txt or GUI Output)
-
-Report details per *_frame_log.txt file:
-
-    File Name
-
-    Status: "VFR detected" or "CFR (or VFR ignored)" (based on forgiving settings/grouping).
-
-    Unique Durations Found: Distinct duration_time values after filtering/grouping. Single unique duration means CFR.
-
-    Summary: Final VFR flag indication.
-
-Prerequisites:
-
-    Python 3.x.
-
-    *_frame_log.txt files (from FFmpeg showinfo).
+It now distinguishes between "Healthy VFR" (a few unique frame rates) and "Suspicious Timestamps" (extreme jitter), allowing you to fix broken files before cutting.
 """
 import os
 import re
@@ -100,25 +23,14 @@ def vfr_detector_forgiving(
     log_file_path,
     ignore_initial_frames,
     ignore_zero_duration,
-    duration_tolerance # New parameter for forgiving duration differences
+    duration_tolerance,
+    suspicious_threshold=20
 ):
     """
     Scans a single _frame_log.txt file to detect VFR, with forgiving settings.
-    Includes a tolerance for grouping similar frame durations.
-
-    Args:
-        log_file_path (str): Path to the _frame_log.txt file.
-        ignore_initial_frames (int): Number of initial frames to ignore when checking for VFR.
-        ignore_zero_duration (bool): If True, ignores frames with duration_time of 0.0.
-        duration_tolerance (float): The maximum difference between two durations for them
-                                    to be considered the same (e.g., 0.00005 for 50 microseconds).
-
-    Returns:
-        tuple: (bool, list) - (True if VFR detected after applying forgiving settings,
-                               list of unique duration values found after grouping)
+    Includes a tolerance for grouping similar frame durations and a threshold 
+    to detect extreme jitter (Suspicious Timestamps).
     """
-    # We will store representative durations here.
-    # Each element will be the average of a group of similar durations.
     unique_grouped_durations = []
     log_pattern = re.compile(r"n:(\d+)\s+.*?duration_time:([0-9.]+)")
 
@@ -136,46 +48,42 @@ def vfr_detector_forgiving(
                     if ignore_zero_duration and duration_time == 0.0:
                         continue
 
-                    # --- New logic for grouping similar durations ---
                     found_group = False
                     for i, existing_avg_duration in enumerate(unique_grouped_durations):
                         if abs(duration_time - existing_avg_duration) < duration_tolerance:
-                            # If the current duration is within tolerance of an existing group,
-                            # update the average of that group. This is a simplified approach
-                            # but effective for VFR detection.
-                            # A more robust approach would track all members of the group
-                            # and re-calculate the average, but for just checking uniqueness,
-                            # this simple update or just marking as found is sufficient.
-                            # For simplicity and performance, we'll just mark it as found.
                             found_group = True
                             break
                     
                     if not found_group:
-                        # If it doesn't fit into any existing group, add it as a new unique duration
                         unique_grouped_durations.append(duration_time)
-                    # --- End new logic ---
 
     except Exception as e:
-        # Return False and an empty list if there's an error
-        return False, []
+        return "ERROR", []
 
-    # VFR is detected if, after grouping, there's more than one unique duration
-    is_vfr = len(unique_grouped_durations) > 1
-    return is_vfr, unique_grouped_durations
+    # Determine status based on the number of unique groups
+    unique_count = len(unique_grouped_durations)
+    if unique_count <= 1:
+        status = "CFR"
+    elif unique_count <= suspicious_threshold:
+        status = "VFR_HEALTHY"
+    else:
+        status = "VFR_SUSPICIOUS"
+
+    return status, unique_grouped_durations
 
 # Function for batch mode operation
 def run_detection_and_save_to_file(folder_path, output_filename="VFR_info.txt",
                                    ignore_initial_frames=50, ignore_zero_duration=True,
-                                   duration_tolerance=0.00005): # New default for batch mode
+                                   duration_tolerance=0.001):
     """
     Performs VFR detection for all _frame_log.txt files in a given folder
     and saves the results to a specified text file.
-    Designed for non-GUI (batch) usage.
     """
     log_files = [f for f in os.listdir(folder_path) if f.endswith('_frame_log.txt')]
 
     output_lines = []
     vfr_videos_detected = False
+    suspicious_videos_detected = False
 
     output_lines.append("--- ExactCut VFR Detector Report ---\n")
     output_lines.append(f"Scanning directory: {folder_path}\n")
@@ -189,30 +97,45 @@ def run_detection_and_save_to_file(folder_path, output_filename="VFR_info.txt",
     else:
         for log_file in log_files:
             full_log_path = os.path.join(folder_path, log_file)
-            is_vfr, durations = vfr_detector_forgiving( # Pass new tolerance parameter
+            status, durations = vfr_detector_forgiving(
                 full_log_path,
                 ignore_initial_frames,
                 ignore_zero_duration,
-                duration_tolerance # Pass the tolerance
+                duration_tolerance
             )
 
             output_lines.append(f"{log_file}:\n")
-            output_lines.append(f"  Status: {'VFR detected' if is_vfr else 'CFR (or VFR ignored)'}\n")
-            output_lines.append("  Unique Durations Found (after filtering and grouping):\n")
+            
+            if status == "CFR":
+                output_lines.append("  Status: CFR (or VFR ignored)\n")
+            elif status == "VFR_HEALTHY":
+                output_lines.append("  Status: VFR NOTED (Healthy Variable Frame Rate)\n")
+                vfr_videos_detected = True
+            elif status == "VFR_SUSPICIOUS":
+                output_lines.append("  Status: SUSPICIOUS TIMESTAMPS (Extreme Jitter Detected!)\n")
+                suspicious_videos_detected = True
+            else:
+                output_lines.append("  Status: Error reading file.\n")
+
+            output_lines.append(f"  Unique Durations Found ({len(durations)} groups): \n")
             if durations:
-                # Sort the durations for consistent output, even though they are "representatives"
                 for d in sorted(list(durations)):
                     output_lines.append(f"    - {d}\n")
             else:
                 output_lines.append("    No valid durations found after filtering.\n")
             output_lines.append("-" * 40 + "\n\n")
 
-            if is_vfr:
-                vfr_videos_detected = True
-
     output_lines.append("\n# Summary\n")
-    if vfr_videos_detected:
-        output_lines.append("VFR NOTED: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
+    
+    # Priority 1: Suspicious Timestamps
+    if suspicious_videos_detected:
+        output_lines.append("ALERT: SUSPICIOUS TIMESTAMPS DETECTED!\n")
+        output_lines.append("One or more videos exhibit extreme frame duration jitter (>10 unique durations).\n")
+        output_lines.append("It is highly recommended to remux these specific videos using the '-video_track_timescale 90k' FFmpeg command before cutting to prevent frame loss.\n")
+    # Priority 2: Healthy VFR
+    elif vfr_videos_detected:
+        output_lines.append("VFR NOTED: Variable Frame Rate was detected in one or more files.\n")
+    # Priority 3: CFR
     else:
         output_lines.append("All videos appear to use Constant Frame Rate (CFR) based on forgiving detection.\n")
 
@@ -250,9 +173,8 @@ class VFRDetectorApp:
         self.ignore_zero_duration_check = tk.Checkbutton(self.params_frame, variable=self.ignore_zero_duration_var, bg="#34495e", fg="white", selectcolor="#34495e", activebackground="#34495e", activeforeground="white")
         self.ignore_zero_duration_check.grid(row=1, column=1, padx=5, pady=5, sticky="w")
 
-        # New GUI element for duration tolerance
         tk.Label(self.params_frame, text="Duration Tolerance (seconds):", bg="#34495e", fg="white").grid(row=2, column=0, padx=5, pady=5, sticky="w")
-        self.duration_tolerance_var = tk.DoubleVar(value=0.00005) # Default tolerance
+        self.duration_tolerance_var = tk.DoubleVar(value=0.001)
         self.duration_tolerance_entry = tk.Entry(self.params_frame, textvariable=self.duration_tolerance_var, width=12, bg="#ecf0f1", fg="#2c3e50", bd=1, relief="flat")
         self.duration_tolerance_entry.grid(row=2, column=1, padx=5, pady=5, sticky="ew")
         
@@ -304,7 +226,6 @@ class VFRDetectorApp:
             messagebox.showwarning("No Folder Selected", "Please select a folder containing _frame_log.txt files first.")
             return
 
-        # Validate duration tolerance input
         try:
             tolerance_val = float(self.duration_tolerance_var.get())
             if tolerance_val < 0:
@@ -318,7 +239,7 @@ class VFRDetectorApp:
         self.browse_button.config(state=tk.DISABLED)
         self.initial_frames_entry.config(state=tk.DISABLED)
         self.ignore_zero_duration_check.config(state=tk.DISABLED)
-        self.duration_tolerance_entry.config(state=tk.DISABLED) # Disable new entry
+        self.duration_tolerance_entry.config(state=tk.DISABLED)
 
         self.output_text.delete(1.0, tk.END)
         self.output_text.insert(tk.END, "--- Running VFR Detection (Please wait, this may take a moment) ---\n\n")
@@ -331,6 +252,7 @@ class VFRDetectorApp:
 
         output_lines_for_gui = []
         vfr_videos_detected = False
+        suspicious_videos_detected = False
 
         if not log_files:
             output_lines_for_gui.append("No *_frame_log.txt files found in the selected directory.\n")
@@ -338,38 +260,51 @@ class VFRDetectorApp:
         else:
             initial_frames = self.initial_frames_var.get()
             ignore_zero_duration = self.ignore_zero_duration_var.get()
-            duration_tolerance = self.duration_tolerance_var.get() # Get tolerance from GUI
+            duration_tolerance = self.duration_tolerance_var.get()
 
             output_lines_for_gui.append(f"Scanning with forgiving settings:\n")
             output_lines_for_gui.append(f"  - Ignore first {initial_frames} frames: {'Yes' if initial_frames > 0 else 'No'}\n")
             output_lines_for_gui.append(f"  - Ignore 0.0 duration frames: {'Yes' if ignore_zero_duration else 'No'}\n")
-            output_lines_for_gui.append(f"  - Duration tolerance: {duration_tolerance} seconds\n\n") # Add to GUI output
+            output_lines_for_gui.append(f"  - Duration tolerance: {duration_tolerance} seconds\n\n")
             
             for log_file in log_files:
                 full_log_path = os.path.join(self.current_folder, log_file)
-                is_vfr, durations = vfr_detector_forgiving(
+                status, durations = vfr_detector_forgiving(
                     full_log_path,
                     initial_frames,
                     ignore_zero_duration,
-                    duration_tolerance # Pass tolerance to the detector
+                    duration_tolerance
                 )
 
                 output_lines_for_gui.append(f"{log_file}:\n")
-                output_lines_for_gui.append(f"  Status: {'VFR detected' if is_vfr else 'CFR (or VFR ignored)'}\n")
-                output_lines_for_gui.append("  Unique Durations Found (after filtering and grouping):\n")
+                
+                if status == "CFR":
+                    output_lines_for_gui.append("  Status: CFR (or VFR ignored)\n")
+                elif status == "VFR_HEALTHY":
+                    output_lines_for_gui.append("  Status: VFR NOTED (Healthy Variable Frame Rate)\n")
+                    vfr_videos_detected = True
+                elif status == "VFR_SUSPICIOUS":
+                    output_lines_for_gui.append("  Status: SUSPICIOUS TIMESTAMPS (Extreme Jitter Detected!)\n")
+                    suspicious_videos_detected = True
+                else:
+                    output_lines_for_gui.append("  Status: Error reading file.\n")
+
+                output_lines_for_gui.append(f"  Unique Durations Found ({len(durations)} groups): \n")
                 if durations:
-                    for d in sorted(list(durations)): # Sort for consistent output
+                    for d in sorted(list(durations)): 
                         output_lines_for_gui.append(f"    - {d}\n")
                 else:
                     output_lines_for_gui.append("    No valid durations found after filtering.\n")
                 output_lines_for_gui.append("-" * 40 + "\n\n")
 
-                if is_vfr:
-                    vfr_videos_detected = True
-
             output_lines_for_gui.append("\n# Summary\n")
-            if vfr_videos_detected:
-                output_lines_for_gui.append("VFR NOTED: One or more videos appear to use Variable Frame Rate (VFR) even after applying forgiving detection.\n")
+            
+            if suspicious_videos_detected:
+                output_lines_for_gui.append("ALERT: SUSPICIOUS TIMESTAMPS DETECTED!\n")
+                output_lines_for_gui.append("One or more videos exhibit extreme frame duration jitter (>10 unique durations).\n")
+                output_lines_for_gui.append("It is highly recommended to remux these specific videos using the '-video_track_timescale 90k' FFmpeg command before cutting to prevent frame loss.\n")
+            elif vfr_videos_detected:
+                output_lines_for_gui.append("VFR NOTED: Variable Frame Rate was detected in one or more files.\n")
             else:
                 output_lines_for_gui.append("All videos appear to use Constant Frame Rate (CFR) based on forgiving detection.\n")
 
@@ -386,13 +321,13 @@ class VFRDetectorApp:
         self.browse_button.config(state=tk.NORMAL)
         self.initial_frames_entry.config(state=tk.NORMAL)
         self.ignore_zero_duration_check.config(state=tk.NORMAL)
-        self.duration_tolerance_entry.config(state=tk.NORMAL) # Re-enable new entry
+        self.duration_tolerance_entry.config(state=tk.NORMAL) 
 
         messagebox.showinfo("Detection Complete", "VFR detection process finished!")
 
     def save_output(self):
         if not self.output_text.get(1.0, tk.END).strip():
-            messagebox.showwarning("No Output", "There is no output to save yet. Please run detection first.")
+            messagebox.showwarning("No Output", "There is no output to save yet.\nPlease run detection first.")
             return
 
         file_path = filedialog.asksaveasfilename(
@@ -418,7 +353,7 @@ if __name__ == "__main__":
                         help='Number of initial frames to ignore (batch mode only).')
     parser.add_argument('--ignore-zero-duration', type=bool, default=True,
                         help='Whether to ignore 0.0 duration frames (batch mode only).')
-    parser.add_argument('--duration-tolerance', type=float, default=0.00005,
+    parser.add_argument('--duration-tolerance', type=float, default=0.001,
                         help='Tolerance for grouping similar frame durations (batch mode only).')
     args = parser.parse_args()
 
@@ -438,4 +373,3 @@ if __name__ == "__main__":
         root = tk.Tk()
         app = VFRDetectorApp(root)
         root.mainloop()
-
