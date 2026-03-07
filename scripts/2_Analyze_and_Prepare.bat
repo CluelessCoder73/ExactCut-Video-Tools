@@ -1,32 +1,37 @@
 @echo off
-REM Batch file to automate Python scripts for ExactCut Video Tools.
-REM This file should be placed in the same folder as the Python scripts and input files.
+setlocal enabledelayedexpansion
+title Stage 2: Analyze and Prepare (ExactCut)
 
-setlocal
-:: Get the current folder path for the VFR detector
-set "CURRENT_DIR=%~dp0"
-
-echo [1/5] Running: vdscript_range_adjuster.py...
-python vdscript_range_adjuster.py
+echo ======================================================
+echo STEP 1: ADJUSTING VDSCRIPT RANGES (I-Frame Alignment)
+echo ======================================================
+python "%~dp0vdscript_range_adjuster.py"
 
 echo.
-echo [2/5] Running: vdscript_vfr_info.py...
-python vdscript_vfr_info.py
+echo ======================================================
+echo STEP 2: ANALYZING GOP SIZES (GOP 5 RULE Check)
+echo ======================================================
+python "%~dp0gop_analyzer.py"
 
 echo.
-echo [3/5] Running: gop_analyzer.py...
-python gop_analyzer.py
+echo ======================================================
+echo STEP 3: GENERATING HUMAN-READABLE INFO FILES
+echo ======================================================
+python "%~dp0vdscript_vfr_info.py"
 
 echo.
-echo [4/5] Running: exactcut_vfr_detector.pyw (Batch Mode)...
-:: Running in batch mode requires the --batch-mode flag and the folder path
-python exactcut_vfr_detector.pyw --batch-mode --path "%CURRENT_DIR%."
+echo ======================================================
+echo STEP 4: GENERATING FINAL TIME-BASED CUTLISTS
+echo ======================================================
+python "%~dp0vdscript_to_timecode_cutlist_generator.py"
 
 echo.
-echo [5/5] Running: vdscript_to_timecode_cutlist_generator.py...
-python vdscript_to_timecode_cutlist_generator.py
-
+echo ------------------------------------------------------
+echo ANALYSIS COMPLETE - CHECK RESULTS:
+echo ------------------------------------------------------
+echo 1. Open 'gop_info.txt' - Ensure Smallest GOP is 5+
+echo 2. Check your '_info.txt' files for segment details.
+echo 3. Your final cutlists are ready for the FFmpeg Cutter!
+echo ------------------------------------------------------
 echo.
-echo ---------------------------------------------------
-echo ALL SCRIPTS FINISHED.
 pause
