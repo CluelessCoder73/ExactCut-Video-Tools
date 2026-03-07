@@ -812,8 +812,8 @@
         }
       ],
       "Folder": true,
-      "PresetName": "Custom Presets",
-      "PresetDescription": "",
+      "PresetName": "High Power Proxies (720p)",
+      "PresetDescription": "Optimized for high quality editing on newer/high performance hardware.",
       "Type": 0
     }
   ],
