@@ -1,119 +1,112 @@
-# ExactCut Video Tools
+# ExactCut Video Tools: A Lossless, VFR-Aware Cutlist Pipeline
 
-**Achieve truly lossless, frame-accurate video cuts without losing a single frame!**
+ExactCut is a suite of Python and Batch scripts designed to bridge the gap between visually editing video via proxy files and performing frame-accurate, lossless cuts using FFmpeg.
 
----
-
-## The Problem with "Lossless" Video Editing
-
-Traditional "lossless" cutting tools (like mkvmerge or FFmpeg stream-copy) are forced to cut at keyframes (I-frames). If you place a cut between keyframes, the tool *must* jump to the next available keyframe to avoid corrupting the video.
-
-This leads to frustrating issues:
-
-* **Lost Frames:** Segments begin *after* your intended start point.
-* **Incomplete Endings:** Endpoints shift back in time or stutter.
-* **Open GOP Corruption:** Modern codecs (like x265/HEVC) use "Open GOP" structures that cause visual artifacting at cut-in points.
-
-## The ExactCut Solution
-
-**ExactCut Video Tools** bypasses these limitations by intelligently combining **VirtualDub2**, **Python scripting**, **FFmpeg**, and **LosslessCut**.
-
-By analyzing FFmpeg frame logs, our scripts automatically adjust your rough cuts to "legal frame boundaries" (I-frames and P-frames). This guarantees that your output segments retain every single desired frame, providing truly lossless cuts at both the start and end of each segment.
-
-### Key Features
-
-* **Zero Frame Loss:** Guarantees no frames are lost at the beginning or end of your cut segments.
-* **Fully VFR Compatible:** Uses high-precision millisecond (ms) offsets, making it fully compatible with Variable Frame Rate (VFR) videos from smartphones and screen recorders.
-* **Open GOP Handling:** `vdscript_range_adjuster.py` provides an option to roll back to the 2nd previous I-frame to prevent corruption in codecs like x265. NOTE: The cut-in points will be corrupted, but your chosen parts will not.
-* **Proxy Editing Ready:** Define cuts effortlessly on lightweight proxy videos;  *(See `\ExactCut-Video-Tools\presets`)*.
-* **All-in-One GUI:** Includes a built-in Cutlist Editor (only for fine-tuning), Frame-to-MS Calculator, and Project Cleanup Tool.
+This workflow guarantees that no frames are lost, prevents desync issues common with Variable Frame Rate (VFR) footage, and automatically snaps your edits to safe I-frame boundaries.
 
 ---
 
-## Prerequisites
+## 📂 Directory Setup
 
-* **Python:** 3.13.7 or newer.
-* **LosslessCut:** 3.64.0 or newer (for merging parts and providing FFmpeg).
-* **VirtualDub2:** For creating your initial cutlists.
-* **HandBrake:** For proxy video creation (optional but recommended).
-* **FFmpeg:** Must be added to your system's PATH. *(See `\ExactCut-Video-Tools\docs\FFMPEG_NOOB_GUIDE.md`)*.
+Before you begin, your working folder must be prepared correctly. The scripts look for specific files in the same directory to function.
+
+**Your folder must contain:**
+
+1. **Source Video(s):** The original files.
+2. **The Entire Scripts Folder:** The contents of `\ExactCut-Video-Tools\scripts` must be copied here.
+* **Crucial:** For "Open GOP" codecs (like x265), you must set "i_frame_offset" to "2" in `vdscript_range_adjuster.py`.
+3. **Correctly Named `.vdscript` Files:** Once you finish editing, your VirtualDub2 scripts must follow this strict format:
+`[Source_Video_Name].[Original_Extension].vdscript`
+
+> **Example:** > If your source is `Vacation.mp4`, your script **must** be named `Vacation.mp4.vdscript`.
 
 ---
 
-## The ExactCut Workflow (Step-by-Step)
+## 🛠️ The Workflow Pipeline
 
-### 1. Prepare Your Source Videos
+### Phase 1: Preparation & Editing
 
-For optimal frame accuracy, ensure your source videos are in **MKV** or **MP4** formats. If they are not, remux them using LosslessCut (Export options > Output container format). Group your videos into folders if necessary.
+> **⚠️ PRO-TIP: Organize by Framerate!** > We highly recommend placing videos with different framerates into separate folders. The ExactCut FFmpeg Cutter uses a default "Seek Nudge" of 133ms.
+> * **At 30 fps:** 133ms is ~4 frames (Minimum GOP needed: 5).
+> * **At 60 fps:** 133ms is ~8 frames (Minimum GOP needed: 9).
+> 
+> 
 
-### 2. Create Proxy Videos (Recommended for higher-resolution videos)
-
-Use HandBrake to create lower-resolution proxies to speed up editing in VirtualDub2. Use one of the custom presets provided with ExactCut Video Tools.
-
-* *Crucial:* DO NOT save proxy videos to the same folder as your input source files!
-* *Tip:* All filters are turned off in the presets. If your source video is interlaced, you will need to enable deinterlacing in HandBrake!
-
-### 3. Generate Frame Logs
-
-Copy the ExactCut scripts into your source video folder and run `frame_log_extractor.bat`.
-
-* This automates FFmpeg to extract precise frame type (I, P, B) and index data for every video in the folder.
+1. **Extract Frame Logs (`1_Verify_and_Log.bat`):** Extracts precise `_frame_log.txt` files for every video. This is your "ground truth" for VFR timestamps.
+2. **Generate Proxy Videos (for HD/4K etc):** Import the provided `.json` presets.
+* **High Power (720p):** For modern desktops.
+* **Low Power (400p):** Optimized for older/budget PCs using the `ultrafast` baseline profile.
 
 
-* *Note: This process may take a while depending on video length.*
+3. **Edit in VirtualDub2:** Load your proxy (or the original if you skipped proxy creation), and make your cuts.
+* **NOTE: VirtualDub2 is endpoint exclusive — meaning that the frame you end the selection on is NOT included in the selection!
+* **Save Your Cutlist:** Once your editing is complete, go to `File > Save processing settings...` (`CTRL + S`).
+* **Crucial:** MAKE SURE to check "Include selection and edit list" in the save dialog. Otherwise, your cuts will NOT be saved! VirtualDub2 will remember this setting for future sessions.
+* **Naming Convention:** The vdscript must be saved with the format `source_video_filename.extension.vdscript`. So, if your source video is called `whatever.mp4`, your final saved vdscript should be called `whatever.mp4.vdscript`.
 
-### 4. Edit in VirtualDub2
+### Phase 2: Analysis & Conversion
 
-Open your proxy video (or original video) in VirtualDub2.
+Run **`2_Analyze_and_Prepare.bat`**. This automated script handles:
 
-* Use `HOME` and `END` to mark the start and end points of the selections you want to **delete**.
-* Save the cutlist by going to `File > Save processing settings...` (`CTRL + S`).
-* **Crucial:** You MUST check "Include selection and edit list" in the save dialog (VirtualDub2 will remember this setting).
-* **Naming:** Save the file as `source_video_filename.extension.vdscript` (e.g., `myvideo.mp4.vdscript`).
+* **Adjustment:** Snaps cut points to legal I-frames.
+* **VFR Info:** Generates a human-readable `_info.txt` summary.
+* **GOP Analysis:** Checks if the starting GOP of each cut is long enough for the FFmpeg "Seek Nudge."
+* **VFR Detector:** Scans for severe timing anomalies in the source.
+* **Cutlist Generation:** Produces the final timecode list for the Cutter.
 
-### 5. Run the Automation Scripts
+### Phase 3: Cut the Video into Individual Segments
 
-Run `run_python_scripts.bat`. This will automatically execute:
+Open `exactcut_ffmpeg_cutter.pyw`, load your source folder, and click **Start Cutting**. All the parts will be saved to subfolders (same names as source videos).
 
-* **`vdscript_range_adjuster.py`**: Snaps your cuts to legal boundaries and creates `_adjusted.vdscript`.
-* **`vdscript_info.py`**: Generates a before-and-after comparison of your cuts (e.g., `myvideo.mp4_info.txt`, `myvideo.mp4_adjusted_info.txt` etc).
-* **`gop_analyzer.py`**: Checks for ultra-short GOPs that might cause frame loss. Read the "help" section in the script for more details.
-* **`exactcut_vfr_detector.pyw`**: Flags any Variable Frame Rate (VFR) videos. Not important any more, I just left it there for informational purposes.
-* **`vdscript_to_timecode_cutlist_generator.py`**: Converts the adjusted scripts into the final `.cutlist.txt` files.
+### Phase 4: Merge
 
-### 6. Cut the Video
-
-Open `exactcut_ffmpeg_cutter.pyw` and select your video folder.
-
-* Adjust your **Start Offset** (The "Seek Nudge" to snap to the keyframe, usually ~133ms).
-* Adjust your **End Offset** (The "Safety Buffer", usually 1000ms).
-* Click **Start Cutting**. The tool will cleanly slice your videos without re-encoding the video stream.
-
-### 7. Merge and Cleanup
-
-* **Merge:** Open LosslessCut, go to `Tools > Merge/concatenate files`, select all your new video segments, and merge them together.
+Open LosslessCut, go to Tools > Merge/concatenate files, browse for desired folder, select all the parts, then merge. Repeat this process until all the parts in each subfolder have been merged - & that's it - FINITO!
 * **Cleanup:** Use the **🧹 Cleanup** button inside the ExactCut FFmpeg Cutter to automatically sweep all the temporary scripts, cutlists, and log files into a `delete` folder to keep your workspace tidy.
 
 ---
 
-## Verifying That Source & Proxy Match
+## ✅ User Best Practices
 
-If you use Proxy videos, it is **critical** that the frame count of your proxy perfectly matches your source video. To verify:
+To ensure maximum file stability and compatibility with all media players after cutting:
 
-1. Open your generated `_frame_log.txt`. Scroll to the last line of actual frame data and look for the `n:` index (e.g., `n:58357`).
-2. Open your proxy video in VirtualDub2 and press `[End]` to jump to the last frame.
-3. The display at the bottom should say `Frame 58358`.
-4. **The Rule:** The VirtualDub2 frame count should always be exactly **+1** compared to the final frame log index (because VirtualDub2 counts the final "empty" frame). If these match, your proxy is perfectly synced!
+* **The 5-Second Rule:** Aim for a minimum of 5 seconds between each segment. Cuts placed too close together can occasionally cause playback "hiccups" in certain hardware decoders.
+* **Verification:** Always keep your `_frame_log.txt` files until you have verified the final output. They are the only way to pinpoint the exact keyframe positions used by the scripts.
 
 ---
 
-## Advanced Configuration
+## 🔍 Troubleshooting & Safety
 
-You can fine-tune how the script adjusts boundaries by editing the parameters at the bottom of `vdscript_range_adjuster.py`:
+### "Smallest starting GOP" is too small?
 
-* `i_frame_offset`: How many I-frames to roll back for start points (Set to `2` for Open GOP codecs like x265).
-* `merge_ranges_option`: Enables merging of overlapping or very close ranges.
-* `min_gap_between_ranges`: Minimum frame gap required to keep ranges separate.
-* `short_cut_mode`: Adjusts endpoint behavior (True for shorter segments, False for full GOPs).
+If `gop_analyzer.py` reports a GOP size smaller than your framerate's requirement, use the **Editor** feature in **ExactCut FFmpeg Cutter GUI** to fix it:
+
+#### Scenario 1: Use "1. Expand Start Earlier"
+
+If there is plenty of room between segments, push the **Start Time** of the offending segment back by **1 second**.
+
+1. Reference your `_frame_log.txt` to find a safe I-frame at least 1 second earlier.
+2. Choose the line #, enter "1" in the "Seconds" field and click **Apply Expansion**.
+
+#### Scenario 2: Use "2. Bridge Gap"
+
+If pushing the start time back violates the **5-second rule** or causes an overlap:
+
+1. Select the offending segment and the one preceding it.
+2. Click **Apply Bridge**. This merges them into one continuous cut, bypassing the GOP issue entirely.
+
+### Missing Frame Logs or Scripts Skipping Files?
+
+* **Check Names:** Ensure your `.vdscript` includes the original extension (e.g., `.mp4.vdscript`).
+* **Missing Logs:** Run `1_Verify_and_Log.bat` again to ensure the `_frame_log.txt` was created.
+
+---
+
+## ⚙️ Requirements
+
+* **Python 3.x**
+* **LosslessCut
+* **FFmpeg** (Standalone or via LosslessCut)
+* **VirtualDub2** (build 44282 or similar)
+* **HandBrake** (For proxy generation)
 
 ---
