@@ -4,6 +4,8 @@ ExactCut is a suite of Python and Batch scripts designed to bridge the gap betwe
 
 This workflow guarantees that no frames are lost, prevents desync issues common with Variable Frame Rate (VFR) footage, and automatically snaps your edits to safe I-frame boundaries.
 
+![image alt](https://github.com/CluelessCoder73/ExactCut-Video-Tools/blob/4dfa7a24ace4e1b7bcdcb4d6d539079fe3208934/exactcut_ffmpeg_cutter.png)
+
 ---
 
 ## 📂 Directory Setup
