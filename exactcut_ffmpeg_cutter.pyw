@@ -34,7 +34,7 @@ EXTRA_FILES = [
 
 SCRIPTS_LIST = [
     'exactcut_vfr_detector.pyw',
-    '1_frame_log_extractor.bat',
+    '1_Verify_and_Log.bat',
     'gop_analyzer.py',
     '2_Analyze_and_Prepare.bat',
     'vdscript_vfr_info.py',  
@@ -801,7 +801,7 @@ class CleanupToolWindow:
             "- Original video files (.mp4, .mkv, .mov, etc.) are NEVER moved.\n\n"
             "\"Remove scripts\" checkbox:\n"
             "- If checked, moves the helper/automation scripts (ExactCut tools) into the 'delete' folder.\n"
-            "- Example: exactcut_vfr_detector.pyw, 1_frame_log_extractor.bat, vdscript_vfr_info.py, vdscript_range_adjuster.py, etc.\n\n"
+            "- Example: exactcut_vfr_detector.pyw, 1_Verify_and_Log.bat, vdscript_vfr_info.py, vdscript_range_adjuster.py, etc.\n\n"
             "\"Remove output segments\" checkbox:\n"
             "- If checked, looks for folders named after each video (e.g. 'whatever' for 'whatever.mp4').\n"
             "- These folders are assumed to contain the ExactCut output segments.\n"
