@@ -29,7 +29,8 @@ CORRESPONDING_EXTENSIONS = [
 
 EXTRA_FILES = [
     'gop_info.txt',
-    'VFR_info.txt'
+    'VFR_info.txt',
+    ']'  # Cleans up the stray log fragment from Stage 1
 ]
 
 SCRIPTS_LIST = [
@@ -39,8 +40,7 @@ SCRIPTS_LIST = [
     '2_Analyze_and_Prepare.bat',
     'vdscript_vfr_info.py',  
     'vdscript_range_adjuster.py',
-    'vdscript_to_timecode_cutlist_generator.py',
-    'exactcut_ffmpeg_cutter.pyw'
+    'vdscript_to_timecode_cutlist_generator.py'
 ]
 
 ORIGINALS_EXT = [
@@ -190,7 +190,7 @@ class FFmpegCutterApp:
         self.root = root
         self.root.title("ExactCut FFmpeg Cutter (MS Precision Edition)")
 
-        self.start_offset_var = tk.IntVar(value=133)
+        self.start_offset_var = tk.IntVar(value=267)
         self.end_offset_var = tk.IntVar(value=1000)
         self.audio_mode_var = tk.StringVar(value="Copy")
         self.audio_bitrate_var = tk.StringVar(value="128")
@@ -240,7 +240,7 @@ class FFmpegCutterApp:
         ttk.Label(frame, text="Start Offset (ms):").grid(row=1, column=0, sticky=tk.W, **padding)
         self.start_entry = ttk.Entry(frame, textvariable=self.start_offset_var, width=6)
         self.start_entry.grid(row=1, column=1, sticky=tk.W, **padding)
-        ToolTip(self.start_entry, "Seek Nudge: Pushes the seek point forward (e.g., 133 ms).")
+        ToolTip(self.start_entry, "Seek Nudge: Pushes the seek point forward (e.g., 267 ms).")
 
         ttk.Label(frame, text="End Offset (ms):").grid(row=1, column=2, sticky=tk.W, **padding)
         self.end_entry = ttk.Entry(frame, textvariable=self.end_offset_var, width=6)
@@ -420,7 +420,7 @@ class FFmpegCutterApp:
         ttk.Label(calc_win, text="Frames to Add:").pack(pady=(5,0))
         frames_entry = ttk.Entry(calc_win, width=10, justify="center")
         frames_entry.pack(pady=2)
-        frames_entry.insert(0, "4") 
+        frames_entry.insert(0, "8") 
 
         result_var = tk.StringVar(value="---")
         ttk.Label(calc_win, textvariable=result_var, font=("Segoe UI", 12, "bold"), foreground="#007acc").pack(pady=10)
@@ -476,7 +476,7 @@ START OFFSET (The "Seek Nudge"):
 - This is NOT a buffer; it pushes the seek point slightly forward.
 - Since your cutlists are keyframe-aligned, this 'nudge' ensures 
   FFmpeg snaps to the correct keyframe rather than the previous one.
-- Recommended: 100ms to 200ms. (0ms will cause approx 10s of unwanted video in many of the output segments).
+- Recommended: 100ms to 300ms. (0ms will cause approx 10s of unwanted video in many of the output segments).
 
 END OFFSET (The "Safety Buffer"):
 - This adds extra duration to the end of the segment.
@@ -484,24 +484,24 @@ END OFFSET (The "Safety Buffer"):
 - Recommended: 1000ms (1 second).
 
 -------------------------------------------------------------
-FRAME RATE MS CHEAT SHEET (For 4 Frames):
+FRAME RATE MS CHEAT SHEET (For 8 Frames):
 To calculate a specific number of frames, use the CALCULATOR 
 button or the approximate values below:
 
-FRAME RATE (FPS)      1 FRAME DURATION      4 FRAMES (Approx)
+FRAME RATE (FPS)      1 FRAME DURATION      8 FRAMES (Approx)
 -------------------------------------------------------------
-  23.976 fps   ---->    41.7 ms            167 ms
-  24.000 fps   ---->    41.7 ms            167 ms
-  25.000 fps   ---->    40.0 ms            160 ms
-  29.970 fps   ---->    33.4 ms            133 ms
-  30.000 fps   ---->    33.3 ms            133 ms
-  50.000 fps   ---->    20.0 ms             80 ms
-  59.940 fps   ---->    16.7 ms             67 ms
-  60.000 fps   ---->    16.7 ms             67 ms
+  23.976 fps   ---->    41.7 ms            334 ms
+  24.000 fps   ---->    41.7 ms            333 ms
+  25.000 fps   ---->    40.0 ms            320 ms
+  29.970 fps   ---->    33.4 ms            267 ms
+  30.000 fps   ---->    33.3 ms            267 ms
+  50.000 fps   ---->    20.0 ms            160 ms
+  59.940 fps   ---->    16.7 ms            133 ms
+  60.000 fps   ---->    16.7 ms            133 ms
 
 Example: 
-To add a 4-frame seek nudge for a 60fps video:
-4 * 16.7 = ~67 ms. Enter '67' in the Start Offset box.
+To add an 8-frame seek nudge for a 60fps video:
+8 * 16.7 = ~133 ms. Enter '133' in the Start Offset box.
 
 -------------------------------------------------------------
 Audio Modes:
@@ -515,7 +515,7 @@ Configuration:
 The last selected folder is automatically saved and loaded.
 Other default values can still be changed by editing this file. Look for:
 
-    self.start_offset_var = tk.IntVar(value=133)
+    self.start_offset_var = tk.IntVar(value=267)
     self.end_offset_var = tk.IntVar(value=1000)
     self.audio_mode_var = tk.StringVar(value="Copy")
     self.audio_bitrate_var = tk.StringVar(value="128")
