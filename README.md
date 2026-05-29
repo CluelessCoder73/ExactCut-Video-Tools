@@ -28,9 +28,9 @@ Before you begin, your working folder must be prepared correctly. The scripts lo
 
 ### Phase 1: Preparation & Editing
 
-> **⚠️ PRO-TIP: Organize by Framerate!** > We highly recommend placing videos with different framerates into separate folders. The ExactCut FFmpeg Cutter uses a default "Seek Nudge" of 133ms.
-> * **At 30 fps:** 133ms is ~4 frames (Minimum GOP needed: 5).
-> * **At 60 fps:** 133ms is ~8 frames (Minimum GOP needed: 9).
+> **⚠️ PRO-TIP: Organize by Framerate!** > We highly recommend placing videos with different framerates into separate folders. The ExactCut FFmpeg Cutter uses a default "Seek Nudge" of 267ms.
+> * **At 30 fps:** 267ms is ~8 frames (Minimum GOP needed: 9).
+> * **At 60 fps:** 267ms is ~16 frames (Minimum GOP needed: 17).
 > 
 > 
 
