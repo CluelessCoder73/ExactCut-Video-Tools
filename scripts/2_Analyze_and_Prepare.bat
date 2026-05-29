@@ -9,7 +9,7 @@ python "%~dp0vdscript_range_adjuster.py"
 
 echo.
 echo ======================================================
-echo STEP 2: ANALYZING GOP SIZES (GOP 5 RULE Check)
+echo STEP 2: ANALYZING GOP SIZES (GOP 9 RULE Check)
 echo ======================================================
 python "%~dp0gop_analyzer.py"
 
@@ -29,7 +29,7 @@ echo.
 echo ------------------------------------------------------
 echo ANALYSIS COMPLETE - CHECK RESULTS:
 echo ------------------------------------------------------
-echo 1. Open 'gop_info.txt' - Ensure Smallest GOP is 5+
+echo 1. Open 'gop_info.txt' - Ensure Smallest GOP is 9+
 echo 2. Check your '_info.txt' files for segment details.
 echo 3. Your final cutlists are ready for the FFmpeg Cutter!
 echo ------------------------------------------------------
