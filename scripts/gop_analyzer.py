@@ -19,8 +19,8 @@ push FFmpeg slightly past the cut point, forcing it to snap to the correct
 keyframe. 
 
 However, if your video has an ultra-short GOP right at the start of a segment 
-(e.g., a GOP that is only 2 frames long), and your Seek Nudge is longer than 
-that GOP (e.g., a 4-frame nudge), FFmpeg will jump entirely over the first 
+(e.g., a GOP that is only 6 frames long), and your Seek Nudge is longer than 
+that GOP (e.g., an 8-frame nudge), FFmpeg will jump entirely over the first 
 keyframe and snap to the next one! This results in lost frames.
 
 This script scans all your files and reports the "Smallest starting GOP" across 
@@ -44,10 +44,10 @@ with a summary at the bottom:
 HOW TO FIX ULTRA-SHORT GOPs USING EXACTCUT FFMPEG CUTTER
 ================================================================================
 If the "Smallest starting GOP" is comfortably larger than your intended Seek Nudge 
-(e.g., the smallest GOP is 250 frames, and you are only nudging by 4 frames), 
+(e.g., the smallest GOP is 250 frames, and you are only nudging by 8 frames), 
 you are perfectly safe! Do nothing.
 
-However, if the smallest starting GOP is dangerously small (e.g., 2 frames), 
+However, if the smallest starting GOP is dangerously small (e.g., 6 frames), 
 you MUST take action to avoid losing frames. You have two options:
 
 METHOD 1: Expand the Segment using the ExactCut Editor (Recommended)
@@ -67,7 +67,7 @@ smaller than the tiny GOP.
     2. Open the "🧮 Calculator" tool.
     3. Enter your video's FPS.
     4. Enter a frame count strictly LESS than the "Smallest starting GOP". 
-       (e.g., If the smallest GOP is 2 frames, enter '1').
+       (e.g., If the smallest GOP is 8 frames, enter '7').
     5. Click "Calculate" and then "Set Start" to apply this ultra-small 
        nudge to your Start Offset (ms).
        
