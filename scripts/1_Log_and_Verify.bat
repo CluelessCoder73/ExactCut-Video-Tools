@@ -1,6 +1,6 @@
 @echo off
 setlocal enabledelayedexpansion
-title Stage 1: Verify and Log (ExactCut)
+title Stage 1: Log and Verify (ExactCut)
 
 rem --- SMART FFMPEG DETECTION ---
 where ffmpeg >nul 2>nul
