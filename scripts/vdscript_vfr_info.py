@@ -10,12 +10,14 @@ from pathlib import Path
 # FFmpeg frame logs to generate a text file containing precise, 
 # timestamp-based info for every cut.
 #
-# VFR COMPATIBLE: Reads exact timestamps from _frame_log.txt
+# Frame-log based timing:
+# Reads exact timestamps from FFmpeg frame logs.
+# Works with both CFR and VFR sources.
 #
 # This script was tested and works with:
 # - Python 3.13.7
 # - VirtualDub2 (build 44282) .vdscript files
-# - "FFmpeg" generated frame log files (the version in LosslessCut 3.68.0)
+# - "FFmpeg" generated frame log files (the version in LosslessCut 3.69.0)
 #
 # Usage:
 # 1. Place this script in the folder with your .vdscript and _frame_log.txt files.
@@ -31,7 +33,7 @@ from pathlib import Path
 # 00:00:58.266 - 00:01:06.358 (Frames 1397 - 1590)    Length: 00:00:08.091 (194 frames)
 # --------------------------------------------------------------------------------
 # Total Length: 00:00:26.609 (638 frames)
-# fps = VFR (Calculated from Log)
+# Timestamps calculated from FFmpeg frame log
 #
 # ----------------------------------------------------------------------
 
@@ -197,7 +199,7 @@ def process_vdscript(vdscript_path):
         f.write("-" * 80 + "\n")
         total_str = seconds_to_hms(total_duration_sec)
         f.write(f"Total Length: {total_str} ({total_frames_count} frames)\n")
-        f.write(f"fps = VFR (Calculated from Log)\n")
+        f.write("Timestamps calculated from FFmpeg frame log\n")
 
     print(f"  -> Generated: {output_file.name}")
 
