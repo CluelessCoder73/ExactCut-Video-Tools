@@ -12,7 +12,7 @@ from tkinter import ttk, filedialog, messagebox
 
 # Tested and works with:
 # - Python 3.13.7
-# - FFmpeg (the version in LosslessCut 3.68.0)
+# - FFmpeg (the version in LosslessCut 3.69.0)
 
 # --- Settings ---
 CUTLIST_SUFFIX = ".cutlist.txt"
@@ -29,13 +29,12 @@ CORRESPONDING_EXTENSIONS = [
 
 EXTRA_FILES = [
     'gop_info.txt',
-    'VFR_info.txt',
-    ']'  # Cleans up the stray log fragment from Stage 1
+    'VFR_info.txt'
 ]
 
 SCRIPTS_LIST = [
     'exactcut_vfr_detector.pyw',
-    '1_Verify_and_Log.bat',
+    '1_Log_and_Verify.bat',
     'gop_analyzer.py',
     '2_Analyze_and_Prepare.bat',
     'vdscript_vfr_info.py',  
@@ -801,7 +800,7 @@ class CleanupToolWindow:
             "- Original video files (.mp4, .mkv, .mov, etc.) are NEVER moved.\n\n"
             "\"Remove scripts\" checkbox:\n"
             "- If checked, moves the helper/automation scripts (ExactCut tools) into the 'delete' folder.\n"
-            "- Example: exactcut_vfr_detector.pyw, 1_Verify_and_Log.bat, vdscript_vfr_info.py, vdscript_range_adjuster.py, etc.\n\n"
+            "- Example: exactcut_vfr_detector.pyw, 1_Log_and_Verify.bat, vdscript_vfr_info.py, vdscript_range_adjuster.py, etc.\n\n"
             "\"Remove output segments\" checkbox:\n"
             "- If checked, looks for folders named after each video (e.g. 'whatever' for 'whatever.mp4').\n"
             "- These folders are assumed to contain the ExactCut output segments.\n"
