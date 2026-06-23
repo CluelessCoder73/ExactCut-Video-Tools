@@ -60,10 +60,25 @@ Click the **VirtualDub2 Info** button in the GUI for a quick reminder of the edi
 
 * **Step 4: Launch FFmpeg Cutter:** Opens the standalone `exactcut_ffmpeg_cutter.pyw` GUI utility to losslessly slice your videos using your newly tailored cutlists.
 
+### 5. Merge
+
+Open LosslessCut, go to Tools > Merge/concatenate files, browse for desired folder, select all the parts, then merge. Repeat this process until all the parts in each subfolder have been merged - & that's it - FINITO!
+* **Cleanup:** Use the **🧹 Cleanup** button inside the ExactCut FFmpeg Cutter to automatically sweep all the leftover files (cutlists, log files etc) into a `delete` folder to keep your workspace tidy.
+
 ---
 
 ## ⚠️ Known Issues & Roadmap
 
 * **Cuttermaran Integration (`.cpf` Export):** The Cuttermaran export feature (`vdscript_to_cpf.py`) is visible in the GUI but **may not be fully functional or stable yet**. We are tracking this feature for a future development cycle. For now, please rely on the core FFmpeg cutting stream.
 
-```
+---
+
+## ⚙️ Requirements
+
+* **Python 3.x**
+* **LosslessCut
+* **FFmpeg** (Standalone or via LosslessCut)
+* **VirtualDub2** (build 44282 or similar)
+* **HandBrake** (For proxy generation)
+
+---
