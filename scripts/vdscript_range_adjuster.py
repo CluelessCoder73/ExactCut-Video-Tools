@@ -183,13 +183,18 @@ def batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_
             else:
                 print(f"Skipped: {filename} (No corresponding frame log file found)")
 
-# Main execution
-directory = '.'  # Current directory, change if needed
-i_frame_offset = 1  # Increase this value to go further back in I-frames
-merge_ranges_option = True  # Set to False to disable merging
-min_gap_between_ranges = 150  # Minimum gap between ranges (in frames)
-short_cut_mode = True  # Set to False for "full GOP mode"
+import argparse
 
-batch_process_vdscripts(directory, i_frame_offset, merge_ranges_option, min_gap_between_ranges, short_cut_mode)
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="ExactCut Range Adjuster")
+    parser.add_argument("--dir", type=str, default=".", help="Directory to process")
+    parser.add_argument("--offset", type=int, default=1, help="I-frame offset")
+    parser.add_argument("--mingap", type=int, default=150, help="Minimum gap between ranges")
+    args = parser.parse_args()
 
-print("Batch processing completed.")
+    merge_ranges_option = True
+    short_cut_mode = True
+
+    print(f"Starting Range Adjuster (Offset: {args.offset}, Min Gap: {args.mingap})")
+    batch_process_vdscripts(args.dir, args.offset, merge_ranges_option, args.mingap, short_cut_mode)
+    print("Batch processing completed.")

@@ -34,7 +34,7 @@ def parse_showinfo_log(log_path):
 
 def main():
     print("--- ExactCut: VFR Cutlist Generator (Clean Format) ---")
-    script_dir = Path(__file__).parent
+    script_dir = Path.cwd()
     
     adjusted_vdscript_suffix = "_adjusted.vdscript" 
     all_files_in_dir = [f for f in script_dir.iterdir() if f.is_file()]
