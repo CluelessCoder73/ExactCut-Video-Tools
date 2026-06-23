@@ -34,7 +34,7 @@ Before you begin, your working folder must be prepared correctly. The scripts lo
 > 
 > 
 
-1. **Extract Frame Logs (`1_Verify_and_Log.bat`):** Extracts precise `_frame_log.txt` files for every video. This is your "ground truth" for VFR timestamps.
+1. **Extract Frame Logs (`1_Log_and_Verify.bat`):** Extracts precise `_frame_log.txt` files for every video. This is your "ground truth" for VFR timestamps.
 2. **Generate Proxy Videos (for HD/4K etc):** Import the provided `.json` presets.
 * **High Power (720p):** For modern desktops.
 * **Low Power (400p):** Optimized for older/budget PCs using the `ultrafast` baseline profile.
@@ -99,7 +99,7 @@ If pushing the start time back violates the **5-second rule** or causes an overl
 ### Missing Frame Logs or Scripts Skipping Files?
 
 * **Check Names:** Ensure your `.vdscript` includes the original extension (e.g., `.mp4.vdscript`).
-* **Missing Logs:** Run `1_Verify_and_Log.bat` again to ensure the `_frame_log.txt` was created.
+* **Missing Logs:** Run `1_Log_and_Verify.bat` again to ensure the `_frame_log.txt` was created.
 
 ---
 
