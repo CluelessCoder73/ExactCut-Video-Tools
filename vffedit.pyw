@@ -108,7 +108,7 @@ class VffEditApp:
             return
             
         p = Path(folder)
-        videos = [f for f in p.iterdir() if f.suffix.lower() in ['.mp4', '.mkv', '.mov', '.avi']]
+        videos = [f for f in p.iterdir() if f.suffix.lower() in ['.mp4', '.m4v', '.mkv', '.mov', '.avi', '.mpv', '.m1v', '.m2v']]
         logs = list(p.glob("*_frame_log.txt"))
         vdscripts = list(p.glob("*.vdscript"))
         adjusted = list(p.glob("*_adjusted.vdscript"))
@@ -168,7 +168,7 @@ class VffEditApp:
         def extract_logs():
             self.log("\n--- Starting Frame Log Extraction ---")
             p = Path(folder)
-            videos = [f for f in p.iterdir() if f.suffix.lower() in ['.mp4', '.mkv', '.mov', '.avi']]
+            videos = [f for f in p.iterdir() if f.suffix.lower() in ['.mp4', '.m4v', '.mkv', '.mov', '.avi', '.mpv', '.m1v', '.m2v']]
             
             for vid in videos:
                 log_path = p / f"{vid.name}_frame_log.txt"
