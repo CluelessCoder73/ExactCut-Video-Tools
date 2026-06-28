@@ -67,12 +67,6 @@ Open LosslessCut, go to Tools > Merge/concatenate files, browse for desired fold
 
 ---
 
-## ⚠️ Known Issues & Roadmap
-
-* **Cuttermaran Integration (`.cpf` Export):** The Cuttermaran export feature (`vdscript_to_cpf.py`) is visible in the GUI but **may not be fully functional or stable yet**. We are tracking this feature for a future development cycle. For now, please rely on the core FFmpeg cutting stream.
-
----
-
 ## ⚙️ Requirements
 
 * **Python 3.x**
