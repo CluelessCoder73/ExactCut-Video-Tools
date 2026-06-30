@@ -190,11 +190,12 @@ if __name__ == "__main__":
     parser.add_argument("--dir", type=str, default=".", help="Directory to process")
     parser.add_argument("--offset", type=int, default=1, help="I-frame offset")
     parser.add_argument("--mingap", type=int, default=150, help="Minimum gap between ranges")
+    parser.add_argument("--fullgop", action="store_true", help="Enable Full GOP Mode (short_cut_mode = False)")
     args = parser.parse_args()
 
     merge_ranges_option = True
-    short_cut_mode = True
+    short_cut_mode = not args.fullgop
 
-    print(f"Starting Range Adjuster (Offset: {args.offset}, Min Gap: {args.mingap})")
+    print(f"Starting Range Adjuster (Offset: {args.offset}, Min Gap: {args.mingap}, Short Cut Mode: {short_cut_mode})")
     batch_process_vdscripts(args.dir, args.offset, merge_ranges_option, args.mingap, short_cut_mode)
     print("Batch processing completed.")
